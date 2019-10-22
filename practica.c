@@ -1,3 +1,10 @@
+//Practica SISTEMES OPERATIUS
+//Clara Valls - clara.valls
+//Ariel Andreas Daniele - arielandreas.daniele
+
+
+
+
 #include "practica.h"
 
 char llegeixComanda(char * comanda){
@@ -37,10 +44,86 @@ char llegeixComanda(char * comanda){
     return opcio;
 }
 
+
+void optionExit(){
+    write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
+}
+
+void optionConnect(){
+    write(1,"Connecting...\n", strlen("Connecting...\n"));
+
+}
+
+
+void optionSay(){
+
+
+}
+
+void optionShowC(){
+    write(1,"Testing...\n", strlen("Testing...\n"));
+
+}
+
+void optionShowA(){
+
+
+}
+
+
+void optionBroadcast(){
+
+
+}
+
+
 int main(int argc, const char* argv[]){
     char opcio;
+    char aux[50] = {0x0};
+    int fd;
 
     opcio = llegeixComanda(*argv);
     printf("%c", opcio);
+
+    do{
+        sprintf(aux,"$%s: ", nom_del_config.dat);
+        write(1,aux,strlen(aux));
+
+        //READ OPCIO INTRODUIDA
+
+        switch(opcio){
+            case SHOW_CONNECTIONS:
+                optionShowC();
+            break;
+
+            case CONNECT:
+                optionConnect();
+            break;
+
+            case SAY:
+                optionSay();
+            break;
+
+            case BROADCAST:
+                optionBroadcast();
+            break;  
+
+            case SHOW_AUDIOS:
+                optionShowA();
+            break;
+
+            case DOWNLOAD:
+                optionDownload();
+            break;
+
+            case EXIT:
+                optionExit();
+            break;
+
+            default:
+                write(1,"Error, opció invàlida\n", strlen("Error, opció invàlida\n"));
+
+        }while(opcio != EXIT);
+
     return 0;
 }
