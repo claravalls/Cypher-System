@@ -212,3 +212,4 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
+//CANVIAR LA SIGNAL DE Ctrl+C perque primer alliberi tota la memoria i desconnecti el sockets i despres es tanqui
