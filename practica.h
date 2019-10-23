@@ -24,7 +24,7 @@ typedef struct{
     int *sysports;
 }Config;
 
-void separaComanda(char *comanda, char limit, int casella);
+void separaComanda(char *comanda, char limit, char i, int casella);
 char llegeixComanda(char * comanda);
 void optionExit();
 void optionConnect();
