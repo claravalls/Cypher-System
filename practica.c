@@ -1,6 +1,33 @@
+//Practica SISTEMES OPERATIUS
+//Clara Valls - clara.valls
+//Ariel Andreas Daniele - arielandreas.daniele
+
 #include "practica.h"
 
-char llegeixComanda(const char * argv[]){
+char ** c;
+
+void separaComanda(char *comanda, char limit, int casella){
+    char i = 0;
+    while(comanda[i] != limit && comanda[i] != '\n'){
+        c[casella][i] = comanda[i];
+        i++;
+    }
+
+    c[casella][i] = '\0';
+
+    if (strcasecmp(c[casella], "SHOW") == 0){
+        c[casella][i] = ' ';
+        i++;
+        while(comanda[i] != limit && comanda[i] != '\n'){
+            c[casella][i] = comanda[i];
+            i++;
+        }
+
+        c[casella][i] = '\0';
+    }
+}
+
+char llegeixComanda(char *comanda){
     char opcio = 0;
     /*
         1 - SHOW CONNECTIONS
@@ -11,35 +38,127 @@ char llegeixComanda(const char * argv[]){
         6 - DOWNLOAD
         7 - EXIT
     */
-    if (strcasecmp(argv[1], "SHOW") == 0){
-        if (strcasecmp(argv[2], "CONNECTIONS") == 0){
-            opcio = 1;
-        }
-        else if (strcasecmp(argv[2], "AUDIOS") == 0){
-            opcio = 5;
-        }
+    c = (char **)malloc(sizeof(char*));
+    c[0] = (char *)malloc(sizeof(char) * 50);
+
+    separaComanda(comanda, ' ', 0);
+
+    if (strcasecmp(c[0], "SHOW CONNECTIONS") == 0){
+        opcio = 1;
     }
-    else if (strcasecmp(argv[1], "CONNECT") == 0){
+    else if (strcasecmp(c[0], "SHOW AUDIOS") == 0){
+        opcio = 5;
+    }
+    /*    c = (char **)malloc(sizeof(char*) * 2);
+        c[1] = (char *)malloc(sizeof(char) * 50);
+    */
+    else if (strcasecmp(c[0], "CONNECT") == 0){
         opcio = 2;
     }
-    else if (strcasecmp(argv[1], "SAY") == 0){
+    else if (strcasecmp(c[0], "SAY") == 0){
         opcio = 3;
     }
-    else if (strcasecmp(argv[1], "BROADCAST") == 0){
+    else if (strcasecmp(c[0], "BROADCAST") == 0){
         opcio = 4;
     }
-    else if (strcasecmp(argv[1], "DOWNLOAD") == 0){
+    else if (strcasecmp(c[0], "DOWNLOAD") == 0){
         opcio = 6;
     }
-    else if (strcasecmp(argv[1], "EXIT") == 0){
+    else if (strcasecmp(c[0], "EXIT") == 0){
         opcio = 7;
     }
     return opcio;
 }
 
-int main(int argc, const char* argv[]){
-    char opcio;
 
-    opcio = llegeixComanda(argv);
+void optionExit(){
+    write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
+}
+
+void optionConnect(){
+    write(1,"Connecting...\n", strlen("Connecting...\n"));
+
+}
+
+
+void optionSay(){
+
+
+}
+
+void optionShowC(){
+    write(1,"Testing...\n", strlen("Testing...\n"));
+
+}
+
+void optionShowA(){
+
+
+}
+
+
+void optionBroadcast(){
+
+
+}
+
+void optionDownload(){
+
+}
+
+
+int main(int argc, const char* argv[]){
+    char opcio, comanda[50];
+    char aux[50] = {0x0};
+    int fd;
+
+
+    //Lectura fitxer
+
+
+    do{
+        sprintf(aux,"$%s: ", argv[1]);
+        write(1,aux,strlen(aux));
+
+        //Llegir opcio introduida
+        strcpy(comanda, "");
+        read(0, comanda, 50);
+        opcio = llegeixComanda(comanda);
+
+        switch(opcio){
+            case SHOW_CONNECTIONS:
+                optionShowC();
+            break;
+
+            case CONNECT:
+                optionConnect();
+            break;
+
+            case SAY:
+                optionSay();
+            break;
+
+            case BROADCAST:
+                optionBroadcast();
+            break;  
+
+            case SHOW_AUDIOS:
+                optionShowA();
+            break;
+
+            case DOWNLOAD:
+                optionDownload();
+            break;
+
+            case EXIT:
+                optionExit();
+            break;
+
+            default:
+                write(1,"Error, opció invàlida\n", strlen("Error, opció invàlida\n"));
+        }
+
+    }while(opcio != EXIT);
+
     return 0;
 }
