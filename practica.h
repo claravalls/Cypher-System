@@ -16,11 +16,11 @@
 #define EXIT 7
 
 typedef struct{
-    char user[50];
-    char dirAudios[50];
-    char ip[16];
+    char *user;
+    char *dirAudios;
+    char *ip;
     int port;
-    char ipWeb[50];
+    char *ipWeb;
     int *sysports;
 }Config;
 
