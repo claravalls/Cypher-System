@@ -328,7 +328,7 @@ int main(int argc, const char* argv[]){
 
 
     do{
-        sprintf(aux,"$%s: ", config.user);
+        sprintf(aux,"$%s: ", config.user); //No ho fa be pel cursor. Si poso argv[1] en comptes de config.user ho fa be
         write(1,aux,strlen(aux));
 
         //Llegir opcio introduida
