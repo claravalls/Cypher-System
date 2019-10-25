@@ -6,6 +6,7 @@
 
 char ** c;
 char sizeofc = 0;
+Config config;
 
 /**
  * comanda: cadena sencera llegida
@@ -114,6 +115,18 @@ char llegeixComanda(char *comanda){
 
 void optionExit(){
     write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
+
+    //alliberem memoria
+    free(config.user);
+    free(config.dirAudios);
+    free(config.ip);
+    free(config.sysports);
+    free(config.ipWeb);
+    
+    //desconnectem sockets
+
+    //reconfigurem signals
+    signal(SIGINT, SIG_DFL);
 }
 
 void optionConnect(){
@@ -147,19 +160,18 @@ void optionDownload(){
 
 }
 
-Config lecturaFitxer(int f, const char *fitxer){
+void lecturaFitxer(const char *fitxer){
 	ssize_t nbytes;
 	unsigned char cadena;
-	int i = 0;
-	Config c;
+	int i = 0, f;
+    char * aux;
 
 	//Lectura fitxer
     f = open(fitxer, O_RDONLY);
     if (f < 0)
     {
     	write(1, "Error opening file...\n", strlen("Error opening file...\n"));
-		c.user = NULL;
-		return c;    
+		config.user = NULL;
 	}
 
 	nbytes = read(f, &cadena, 1);
@@ -168,140 +180,155 @@ Config lecturaFitxer(int f, const char *fitxer){
 	{
 		//User
 		i = 0;
-		c.user = (char *)malloc(sizeof(char));
+		config.user = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			c.user[i] = cadena;
+			config.user[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			c.user = (char *)realloc(c.user, sizeof(char) * (i + 1));
+			config.user = (char *)realloc(config.user, sizeof(char) * (i + 1));
 		}
-		c.user[i] = '\0';
+		config.user[i] = '\0';
 
 		//DirAudios
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		c.dirAudios = (char *)malloc(sizeof(char));
+		config.dirAudios = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			c.dirAudios[i] = cadena;
+			config.dirAudios[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			c.dirAudios = (char *)realloc(c.dirAudios, sizeof(char) * (i + 1));
+			config.dirAudios = (char *)realloc(config.dirAudios, sizeof(char) * (i + 1));
 		}
-		c.dirAudios[i] = '\0';
-
+		config.dirAudios[i] = '\0';
 
 		//IP
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		c.ip = (char *)malloc(sizeof(char));
+		config.ip = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			c.ip[i] = cadena;
+			config.ip[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			c.ip = (char *)realloc(c.ip, sizeof(char) * (i + 1));
+			config.ip = (char *)realloc(config.ip, sizeof(char) * (i + 1));
 		}
-		c.ip[i] = '\0';
-
+		config.ip[i] = '\0';
 
 		//Port
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		char *portAux = (char *)malloc(sizeof(int));
+		aux = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			portAux[i] = cadena;
+			aux[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			portAux = (char *)realloc(portAux, sizeof(char) * (i + 1));
+			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
 		}
-		portAux[i] = '\n';
+		aux[i] = '\0';
 
-		i = 0;
-		while(portAux[i] != '\n'){
-
-			c.port = c.port * 10 + portAux[i] - '0';
-			i++;
-		}
+		config.port = atoi(aux);
+        free(aux);
 
 		//ipWeb
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		c.ipWeb = (char *)malloc(sizeof(char));
+		config.ipWeb = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			c.ipWeb[i] = cadena;
+			config.ipWeb[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			c.ipWeb = (char *)realloc(c.ipWeb, sizeof(char) * (i + 1));
+			config.ipWeb = (char *)realloc(config.ipWeb, sizeof(char) * (i + 1));
 		}
-		c.ipWeb[i] = '\0';
+		config.ipWeb[i] = '\0';
 
 		//Sysport Begin
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		c.sysports[0] = (int *)malloc(sizeof(int));
+		config.sysports = (int *)malloc(sizeof(int) * 2);
+
+        aux = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			c.sysports[0] = c.sysports[0] * 10 + cadena - '0'; 
-
+			aux[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
+			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
 		}
+        aux[i] = '\0';
 
+		config.sysports[0] = atoi(aux);
+        free(aux);
 
 		//Sysport End
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		c.sysports[1] = (int *)malloc(sizeof(int));
-		while (cadena != '\n')
+
+        aux = (char *)malloc(sizeof(char));
+		while (cadena != '\n' && nbytes > 0)
 		{
-			c.sysports[1] = c.sysports[1] * 10 + cadena - '0'; 
+			aux[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
+			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
 		}
+        aux[i] = '\0';
+
+		config.sysports[1] = atoi(aux);
+        free(aux);
+
+        if (nbytes != 0) {
+            nbytes = read(f, &cadena, 1);
+        }
 	}
 
 
-	printf("USER: %s\n",c.user);
-	printf("Dir: %s\n",c.dirAudios);
+	printf("\n$%s: ",config.user);
+	/*printf("Dir: %s\n",c.dirAudios);
 	printf("IP: %s\n",c.ip);
 	printf("Port: %d\n",c.port);
 	printf("ip Web: %s\n",c.ipWeb);
 	printf("Sysport begin: %d\n",c.sysports[0]);
-	printf("Sysport end: %d\n",c.sysports[1]);
+	printf("Sysport end: %d\n",c.sysports[1]);*/
 
 	close(f);
+}
 
-	return c;
+void stopAll(){
+    optionExit();
+    kill(getpid(), SIGINT);
 }
 
 
 int main(int argc, const char* argv[]){
     char opcio, comanda[50];
     char aux[50] = {0x0};
-    int fd, f;
-    Config cfg, cfgNull = {0};
-    const char *fitxer = argv[0];
+    int fd;
 
-    cfg = lecturaFitxer(f, fitxer);
+    if (argc < 2){
+        write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
+    }
 
-    if (cfg.user == NULL)
+    signal(SIGINT, stopAll);
+    lecturaFitxer(argv[1]);
+
+    if (config.user == NULL)
     {
-    	return 1;
+    	return -1;
     }
 
 
     do{
-        sprintf(aux,"$%s: ", argv[1]);
+        sprintf(aux,"$%s: ", config.user);
         write(1,aux,strlen(aux));
 
         //Llegir opcio introduida

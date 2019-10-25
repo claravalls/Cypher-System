@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include <pthread.h>
 
@@ -24,6 +25,7 @@ typedef struct{
     int *sysports;
 }Config;
 
+void lecturaFitxer(const char *fitxer);
 void separaComanda(char *comanda, char limit, char i, int casella);
 char llegeixComanda(char * comanda);
 void optionExit();
