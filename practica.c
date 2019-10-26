@@ -183,7 +183,7 @@ void lecturaFitxer(const char *fitxer){
 		config.user = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			config.user[i] = cadena;
+            config.user[i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
 			config.user = (char *)realloc(config.user, sizeof(char) * (i + 1));
@@ -285,14 +285,14 @@ void lecturaFitxer(const char *fitxer){
 
 		config.sysports[1] = atoi(aux);
         free(aux);
+        
 
         if (nbytes != 0) {
             nbytes = read(f, &cadena, 1);
         }
 	}
 
-
-	printf("\n$%s: ",config.user);
+	//printf("\n$%s: ",config.user);
 	/*printf("Dir: %s\n",c.dirAudios);
 	printf("IP: %s\n",c.ip);
 	printf("Port: %d\n",c.port);
@@ -326,10 +326,9 @@ int main(int argc, const char* argv[]){
     	return -1;
     }
 
-
     do{
-        sprintf(aux,"$%s: ", config.user); //No ho fa be pel cursor. Si poso argv[1] en comptes de config.user ho fa be
-        write(1,aux,strlen(aux));
+        sprintf(aux, "\n$%s: ", config.user);
+        write(1, aux, strlen(aux));
 
         //Llegir opcio introduida
         strcpy(comanda, "");
