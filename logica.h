@@ -1,3 +1,7 @@
+#ifndef _LOGICA_H_
+#define _LOGICA_H_
+
+
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -25,12 +29,14 @@ typedef struct{
     int *sysports;
 }Config;
 
-void lecturaFitxer(const char *fitxer);
-void separaComanda(char *comanda, char limit, char i, int casella);
-char llegeixComanda(char * comanda);
 void optionExit();
 void optionConnect();
+void optionDownload();
 void optionSay();
 void optionShowC();
 void optionShowA();
 void optionBroadcast();
+void stopAll();
+
+
+#endif

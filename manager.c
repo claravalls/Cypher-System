@@ -1,12 +1,8 @@
-//Practica SISTEMES OPERATIUS
-//Clara Valls - clara.valls
-//Ariel Andreas Daniele - arielandreas.daniele
+#include "manager.h"
 
-#include "practica.h"
 
 char ** c;
 char sizeofc = 0;
-Config config;
 
 /**
  * comanda: cadena sencera llegida
@@ -113,58 +109,14 @@ char llegeixComanda(char *comanda){
 }
 
 
-void optionExit(){
-    write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
-
-    //alliberem memoria
-    free(config.user);
-    free(config.dirAudios);
-    free(config.ip);
-    free(config.sysports);
-    free(config.ipWeb);
-    
-    //desconnectem sockets
-
-    //reconfigurem signals
-    signal(SIGINT, SIG_DFL);
-}
-
-void optionConnect(){
-    write(1,"Connecting...\n", strlen("Connecting...\n"));
-
-}
 
 
-void optionSay(){
-
-
-}
-
-void optionShowC(){
-    write(1,"Testing...\n", strlen("Testing...\n"));
-
-}
-
-void optionShowA(){
-
-
-}
-
-
-void optionBroadcast(){
-
-
-}
-
-void optionDownload(){
-
-}
-
-void lecturaFitxer(const char *fitxer){
+Config lecturaFitxer(const char *fitxer){
 	ssize_t nbytes;
 	unsigned char cadena;
 	int i = 0, f;
     char * aux;
+    Config config;
 
 	//Lectura fitxer
     f = open(fitxer, O_RDONLY);
@@ -292,93 +244,30 @@ void lecturaFitxer(const char *fitxer){
         }
 	}
 
-	//printf("\n$%s: ",config.user);
-	/*printf("Dir: %s\n",c.dirAudios);
-	printf("IP: %s\n",c.ip);
-	printf("Port: %d\n",c.port);
-	printf("ip Web: %s\n",c.ipWeb);
-	printf("Sysport begin: %d\n",c.sysports[0]);
-	printf("Sysport end: %d\n",c.sysports[1]);*/
-
 	close(f);
-}
 
-void stopAll(){
-    optionExit();
-    kill(getpid(), SIGINT);
+    return config;
 }
 
 
-int main(int argc, const char* argv[]){
-    char opcio, comanda[50];
-    char aux[50] = {0x0};
-    int fd;
 
-    if (argc < 2){
-        write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
-    }
 
-    signal(SIGINT, stopAll);
-    lecturaFitxer(argv[1]);
-
-    if (config.user == NULL)
+void alliberaMemoriaC(){
+    //alliberem memòria de c
+    for (char i = 0; i <= sizeofc; i++)
     {
-    	return -1;
+        free(c[i]);
     }
-
-    do{
-        sprintf(aux, "\n$%s: ", config.user);
-        write(1, aux, strlen(aux));
-
-        //Llegir opcio introduida
-        strcpy(comanda, "");
-        read(0, comanda, 120);
-        opcio = llegeixComanda(comanda);
-
-        switch(opcio){
-            case SHOW_CONNECTIONS:
-                optionShowC();
-            break;
-
-            case CONNECT:
-                optionConnect();
-            break;
-
-            case SAY:
-                optionSay();
-            break;
-
-            case BROADCAST:
-                optionBroadcast();
-            break;  
-
-            case SHOW_AUDIOS:
-                optionShowA();
-            break;
-
-            case DOWNLOAD:
-                optionDownload();
-            break;
-
-            case EXIT:
-                optionExit();
-            break;
-
-            default:
-                write(1,"Error, opció invàlida\n", strlen("Error, opció invàlida\n"));
-        }
-
-        //alliberem memòria de c
-        for (char i = 0; i <= sizeofc; i++)
-        {
-            free(c[i]);
-        }
-        
-        free(c);
-
-    }while(opcio != EXIT);
-
-    return 0;
+    
+    free(c);
 }
 
-//CANVIAR LA SIGNAL DE Ctrl+C perque primer alliberi tota la memoria i desconnecti el sockets i despres es tanqui
+
+void alliberaMemoriaConfig(Config *config){
+    //alliberem memoria
+    free(config->user);
+    free(config->dirAudios);
+    free(config->ip);
+    free(config->sysports);
+    free(config->ipWeb);
+}
