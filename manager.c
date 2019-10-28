@@ -10,8 +10,8 @@ char sizeofc = 0;
  * i: casella inicial de la cadena comanda on començar a separar
  * casella: casella de l'array on guardar el valor separat
 */
-void separaComanda(char *comanda, char limit, char i, int casella){
-    char j = 0;
+void separaComanda(char *comanda, char limit, int i, int casella){
+    int j = 0;
 
     while(comanda[i] != limit && comanda[i] != '\n'){
         c[casella][j] = comanda[i];
@@ -251,10 +251,9 @@ Config lecturaFitxer(const char *fitxer){
 
 
 
-
 void alliberaMemoriaC(){
     //alliberem memòria de c
-    for (char i = 0; i <= sizeofc; i++)
+    for (int i = 0; i <= sizeofc; i++)
     {
         free(c[i]);
     }

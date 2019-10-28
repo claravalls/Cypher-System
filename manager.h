@@ -14,7 +14,7 @@
 
 
 Config lecturaFitxer(const char *fitxer);
-void separaComanda(char *comanda, char limit, char i, int casella);
+void separaComanda(char *comanda, char limit, int i, int casella);
 char llegeixComanda(char * comanda);
 void alliberaMemoriaC();
 void alliberaMemoriaConfig(Config * config);

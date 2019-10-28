@@ -1,17 +1,15 @@
-CC = gcc
-CFLAGS  = -Wall -Wextra
+CC=gcc
+CFLAGS=-Wall -Wextra -g
+LDFLAGS=-lpthread
+SOURCES=main.c manager.c logica.c
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=p.exe
 
-p.exe:  main.o manager.o logica.o 
-	$(CC) -o p.exe main.o manager.o logica.o $(CFLAGS)
+all: $(SOURCES) $(EXECUTABLE)
+	rm -f *.o *~
 
-main.o:  main.c
-	$(CC) -c main.c $(CFLAGS)
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $@  $(LDFLAGS)
 
-manager.o:  manager.c manager.h 
-	$(CC) -c manager.c $(CFLAGS)
-
-logica.o:  logica.c logica.h 
-	$(CC) -c logica.c $(CFLAGS)
-
-clean: 
-	$(RM) count *.o *~
+.o:
+	$(CC) $(CFLAGS) $< -o $@
