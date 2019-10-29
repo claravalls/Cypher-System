@@ -1,4 +1,5 @@
 //Practica SISTEMES OPERATIUS
+//Fase actual: 1
 //Clara Valls - clara.valls
 //Ariel Andreas Daniele - arielandreas.daniele
 
