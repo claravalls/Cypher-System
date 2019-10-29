@@ -66,7 +66,7 @@ int main(int argc, const char* argv[]){
             break;
 
             default:
-                write(1,"Error, opció invàlida\n", strlen("Error, opció invàlida\n"));
+                write(1,"Error, invalid option\n", strlen("Error, invalid option\n"));
         }
 
         alliberaMemoriaC();

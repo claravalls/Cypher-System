@@ -2,7 +2,7 @@
 
 
 char ** c;
-char sizeofc = 0;
+char sizeofc;
 
 /**
  * comanda: cadena sencera llegida
@@ -13,25 +13,35 @@ char sizeofc = 0;
 void separaComanda(char *comanda, char limit, int i, int casella){
     int j = 0;
 
-    while(comanda[i] != limit && comanda[i] != '\n'){
-        c[casella][j] = comanda[i];
+    if(comanda[i] == ' '){ //em salto l'espai entre paraules
         i++;
-        j++;
     }
 
-    c[casella][j] = '\0';
-
-    if (strcasecmp(c[casella], "SHOW") == 0){
-        c[casella][j] = ' ';
-        i++;
-        j++;
-        while(comanda[i] != ' ' && comanda[i] != '\n'){
+    if(comanda[i] == '\n'){
+        write(1, "Not enough arguments. ", strlen("Not enough arguments. "));
+        c[casella][0] = '\0';
+    }
+    else{
+        while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
             i++;
             j++;
         }
 
         c[casella][j] = '\0';
+
+        if (strcasecmp(c[casella], "SHOW") == 0){
+            c[casella][j] = ' ';
+            i++;
+            j++;
+            while(comanda[i] != ' ' && comanda[i] != '\n'&& j < 20){
+                c[casella][j] = comanda[i];
+                i++;
+                j++;
+            }
+
+            c[casella][j] = '\0';
+        }
     }
 }
 
@@ -52,64 +62,98 @@ char llegeixComanda(char *comanda){
     separaComanda(comanda, ' ', 0, 0);
 
     if (strcasecmp(c[0], "SHOW CONNECTIONS") == 0){
+        sizeofc = 0;
         opcio = 1;
     }
     else if (strcasecmp(c[0], "SHOW AUDIOS") == 0){
         opcio = 5;
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
+        
         c[1] = (char *)malloc(sizeof(char) * 5);
-        separaComanda(comanda, ' ', strlen("SHOW AUDIOS") + 1, 1);
+        separaComanda(comanda, ' ', strlen("SHOW AUDIOS"), 1);
+        //ens assegurem que hi hagi els arguments necessaris
+        if(c[1][0] == '\0'){
+            opcio = 0;
+        }
     }
     
     else if (strcasecmp(c[0], "CONNECT") == 0){
         opcio = 2;
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
+
         c[1] = (char *)malloc(sizeof(char) * 5);
-        separaComanda(comanda, ' ', strlen("CONNECT") + 1, 1);
+        separaComanda(comanda, ' ', strlen("CONNECT"), 1);
+        //ens assegurem que hi hagi els arguments necessaris
+        if(c[1][0] == '\0'){
+            opcio = 0;
+        }
     }
     else if (strcasecmp(c[0], "SAY") == 0){
         opcio = 3;
         sizeofc = 2;
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
-        c[1] = (char *)malloc(sizeof(char) * 5);
-        separaComanda(comanda, ' ', strlen("SAY") + 1, 1);
 
-        //text
-        c = (char **)realloc(c, sizeof(char*) * 3);
-        c[2] = (char *)malloc(sizeof(char) * 100);
-        separaComanda(comanda, '\n', strlen("SAY") + strlen(c[1]) + 2, 2);
+        c[1] = (char *)malloc(sizeof(char) * 5);
+        separaComanda(comanda, ' ', strlen("SAY"), 1);
+        //ens assegurem que hi hagi els arguments necessaris
+        if(c[1][0] == '\0'){
+            opcio = 0;
+        }
+        else{
+            //text
+            c = (char **)realloc(c, sizeof(char*) * 3);
+            c[2] = (char *)malloc(sizeof(char) * 100);
+            separaComanda(comanda, '\n', strlen("SAY") + strlen(c[1]) + 1, 2);
+            //ens assegurem que hi hagi els arguments necessaris
+            if(c[2][0] == '\0'){
+                opcio = 0;
+            }
+        }
     }
     else if (strcasecmp(c[0], "BROADCAST") == 0){
         opcio = 4;
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
+
         c[1] = (char *)malloc(sizeof(char) * 5);
-        separaComanda(comanda, '\n', strlen("BROADCAST") + 1, 1);
+        separaComanda(comanda, '\n', strlen("BROADCAST"), 1);
+        //ens assegurem que hi hagi els arguments necessaris
+        if(c[1][0] == '\0'){
+            opcio = 0;
+        }
     }
     else if (strcasecmp(c[0], "DOWNLOAD") == 0){
         opcio = 6;
         sizeofc = 2;
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
-        c[1] = (char *)malloc(sizeof(char) * 5);
-        separaComanda(comanda, ' ', strlen("DOWNLOAD") + 1, 1);
 
-        //audio
-        c = (char **)realloc(c, sizeof(char*) * 3);
-        c[2] = (char *)malloc(sizeof(char) * 100);
-        separaComanda(comanda, '\n', strlen("DOWNLOAD") + strlen(c[1]) + 2, 2);
+        c[1] = (char *)malloc(sizeof(char) * 5);
+        separaComanda(comanda, ' ', strlen("DOWNLOAD"), 1);
+        //ens assegurem que hi hagi els arguments necessaris
+        if(c[1][0] == '\0'){
+            opcio = 0;
+        }
+        else{
+            //audio
+            c = (char **)realloc(c, sizeof(char*) * 3);
+            c[2] = (char *)malloc(sizeof(char) * 100);
+            separaComanda(comanda, '\n', strlen("DOWNLOAD") + strlen(c[1]) + 1, 2);
+            //ens assegurem que hi hagi els arguments necessaris
+            if(c[2][0] == '\0'){
+                opcio = 0;
+            }
+        }
     }
     else if (strcasecmp(c[0], "EXIT") == 0){
         opcio = 7;
+        sizeofc = 0;
     }
     return opcio;
 }
-
-
-
 
 Config lecturaFitxer(const char *fitxer){
 	ssize_t nbytes;
