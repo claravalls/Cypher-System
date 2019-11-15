@@ -5,7 +5,7 @@
 
 #include "logica.h"
 #include "manager.h"
-
+#include "network.h"
 
 Config config;
 
@@ -43,7 +43,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case CONNECT:
-                optionConnect();
+                optionConnect(config.port, config.ip, config.user);
             break;
 
             case SAY:

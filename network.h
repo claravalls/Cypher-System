@@ -8,3 +8,5 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
+
+int connect(int port, char * ip, char * user);

@@ -1,4 +1,5 @@
 #include "logica.h"
+#include "network.h"
 
 void optionExit(){
     write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
@@ -9,8 +10,9 @@ void optionExit(){
     signal(SIGINT, SIG_DFL);
 }
 
-void optionConnect(){
+void optionConnect(int port, char *ip, char *user){
     write(1,"Connecting...\n", strlen("Connecting...\n"));
+    connect(port, ip, user);
 
 }
 
