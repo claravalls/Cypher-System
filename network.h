@@ -17,8 +17,8 @@
 
 #define ERR_SOCKET "Error creando el socket.\n"
 
-int connectSocket(const char* ip, int port);
-int connect(int port, char * ip, char * user);
+int connectServer(const char* ip, int port);
+int connectClient(int port, char * ip, char * user, int sockfd);
 
 
 #endif

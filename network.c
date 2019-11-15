@@ -2,14 +2,13 @@
 
 
 
-int connectSocket(const char* ip, int port){
+int connectServer(const char* ip, int port){
     int sockfd = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in s_addr;
     memset (&s_addr, 0, sizeof (s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons (port);
     if (inet_aton (ip, &s_addr.sin_addr) == 0) {
-        write(1, ERR_IP_ADR, strlen (ERR_IP_ADR));
         return -1;
     }
 
@@ -19,9 +18,9 @@ int connectSocket(const char* ip, int port){
 
     listen (sockfd, 3);
     return sockfd;
+}
 
-
-int connect(int port, char * ip, char * user){
+int connectClient(int port, char * ip, char * user, int sockfd){
     char okMessage[35];
     //connect
     struct sockaddr_in s_addr;
@@ -38,6 +37,6 @@ int connect(int port, char * ip, char * user){
     }
 
     sprintf (okMessage, "%d connected: %s", port, user);
-    wrtie (1, okMessage, strlen(okMessage));
+    write (1, okMessage, strlen(okMessage));
     return 0;
 }

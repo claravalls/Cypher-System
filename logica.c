@@ -12,7 +12,7 @@ void optionExit(){
 
 void optionConnect(int port, char *ip, char *user){
     write(1,"Connecting...\n", strlen("Connecting...\n"));
-    connect(port, ip, user);
+    connectClient(port, ip, user);
 
 }
 

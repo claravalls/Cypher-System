@@ -23,7 +23,7 @@ int main(int argc, const char* argv[]){
 
     config = lecturaFitxer(argv[1]);
 
-    sockfd = connectSocket(config.ip, config.port);
+    sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
         write(1, ERR_SOCKET, strlen(ERR_SOCKET));
         return -1;
@@ -55,7 +55,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case CONNECT:
-                optionConnect(config.port, config.ip, config.user);
+                optionConnect(config.port, config.ip, config.user, sockfd);
             break;
 
             case SAY:
