@@ -10,9 +10,9 @@ void optionExit(){
     signal(SIGINT, SIG_DFL);
 }
 
-void optionConnect(int port, char *ip, char *user){
+void optionConnect(int port, char *ip, char *user, int sockfd){
     write(1,"Connecting...\n", strlen("Connecting...\n"));
-    connectClient(port, ip, user);
+    connectClient(port, ip, user, sockfd);
 
 }
 
