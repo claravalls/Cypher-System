@@ -1,10 +1,37 @@
 #include "network.h"
 
+int *clients;
+int quants;
 
+void afegeixClient(int newsock){
+    clients = (int*)realloc(clients, sizeof(int) * (quants + 1));
+    clients[quants] = newsock;
+    quants++;
+}
+
+static void *threadFunc (void *sockfd){
+    int newsock;
+    
+    while (1){
+        struct sockaddr_in s_addr;
+        socklen_t len = sizeof (s_addr);
+        int *socket = (int*) malloc(sizeof(int));
+        socket = (int*) (sockfd);
+        newsock = accept (*socket, (void *) &s_addr, &len);
+        if (newsock < 0) {
+            write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
+            break;
+        }
+        free(socket);
+        afegeixClient(newsock);
+    }
+    return (void *) sockfd;
+}
 
 int connectServer(const char* ip, int port){
     int sockfd = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in s_addr;
+
     memset (&s_addr, 0, sizeof (s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons (port);
@@ -17,6 +44,10 @@ int connectServer(const char* ip, int port){
     }
 
     listen (sockfd, 3);
+
+    clients = (int*) malloc (sizeof(int));
+    quants = 0;
+
     return sockfd;
 }
 

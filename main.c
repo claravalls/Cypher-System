@@ -9,11 +9,30 @@
 
 Config config;
 
+static void *threadFunc (void *sockfd){
+    int newsock;
+    
+    while (1){
+        struct sockaddr_in s_addr;
+        socklen_t len = sizeof (s_addr);
+        int *socket = (int*) malloc(sizeof(int));
+        socket = (int*) (sockfd);
+        newsock = accept (*socket, (void *) &s_addr, &len);
+        if (newsock < 0) {
+            write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
+            break;
+        }
+        free(socket);
+        afegeixClient(newsock);
+    }
+    return (void *) sockfd;
+}
 
 int main(int argc, const char* argv[]){
     char opcio, comanda[50];
     char aux[50] = {0x0};
     int sockfd;
+    pthread_t t1;
 
     if (argc < 2){
         write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
@@ -29,13 +48,14 @@ int main(int argc, const char* argv[]){
         return -1;
     }
 
+    pthread_create(&t1, NULL, threadFunc, &sockfd);  
+
     if (config.user == NULL)
     {
     	return -1;
     }
 
     write(1, "\nStarting Trinity...\n", strlen("\nStarting Trinity...\n"));
-
 
 
     do{
