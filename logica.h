@@ -29,7 +29,7 @@ typedef struct{
     int *sysports;
 }Config;
 
-void optionExit();
+void optionExit(int socket);
 void optionConnect();
 void optionDownload();
 void optionSay();

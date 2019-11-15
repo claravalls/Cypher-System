@@ -40,3 +40,4 @@ int connectClient(int port, char * ip, char * user, int sockfd){
     write (1, okMessage, strlen(okMessage));
     return 0;
 }
+

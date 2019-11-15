@@ -27,8 +27,6 @@ int main(int argc, const char* argv[]){
     if (sockfd < 0) {
         write(1, ERR_SOCKET, strlen(ERR_SOCKET));
         return -1;
-    }else{
-    	printf("SERVIDOR CONECTADO\n");
     }
 
     if (config.user == NULL)
@@ -75,7 +73,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case EXIT:
-                optionExit();
+                optionExit(sockfd);
             break;
 
             default:
