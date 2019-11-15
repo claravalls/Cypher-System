@@ -1,10 +1,11 @@
 //Practica SISTEMES OPERATIUS
-//Fase actual: 1
+//Fase actual: 2
 //Clara Valls - clara.valls
 //Ariel Andreas Daniele - arielandreas.daniele
 
 #include "logica.h"
 #include "manager.h"
+#include "network.h"
 
 
 Config config;
@@ -13,13 +14,23 @@ Config config;
 int main(int argc, const char* argv[]){
     char opcio, comanda[50];
     char aux[50] = {0x0};
+    int sockfd;
 
     if (argc < 2){
         write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
     }
 
     signal(SIGINT, stopAll);
+
     config = lecturaFitxer(argv[1]);
+
+    sockfd = connectSocket(config.ip, config.port);
+    if (sockfd < 0) {
+        write(1, ERR_SOCKET, strlen(ERR_SOCKET));
+        return -1;
+    }else{
+    	printf("SERVIDOR CONECTADO\n");
+    }
 
     if (config.user == NULL)
     {
@@ -27,6 +38,8 @@ int main(int argc, const char* argv[]){
     }
 
     write(1, "\nStarting Trinity...\n", strlen("\nStarting Trinity...\n"));
+
+
 
     do{
         sprintf(aux, "\n$%s: ", config.user);

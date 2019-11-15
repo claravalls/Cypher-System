@@ -1,3 +1,7 @@
+#ifndef _NETWORK_H_
+#define _NETWORK_H_
+
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -8,3 +12,11 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
+
+#include "logica.h"
+
+#define ERR_SOCKET "Error creando el socket.\n"
+
+int connectSocket(const char* ip, int port);
+
+#endif
