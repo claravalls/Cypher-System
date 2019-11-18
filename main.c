@@ -78,7 +78,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case EXIT:
-                optionExit();
+                optionExit(sockfd);
             break;
 
             default:
