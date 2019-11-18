@@ -18,7 +18,7 @@ char* readUntil(int fd, char end) {
         i++;
     }
 
-	string[i] = '\n';
+	string[i - 1] = '\n';
     return string;
 }
 
@@ -36,7 +36,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     }
 
     if(comanda[i] == '\n'){
-        write(1, "Not enough arguments. ", strlen("Not enough arguments. "));
+        write(1, "Not enough arguments.\n", strlen("Not enough arguments.\n"));
         c[casella][0] = '\0';
     }
     else{
@@ -44,10 +44,9 @@ void separaComanda(char *comanda, char limit, int i, int casella){
             c[casella][j] = comanda[i];
             
             //printf("%d %c\n", c[casella][j], c[casella][j]);
-            
-
             i++;
             j++;
+            c[casella] = (char *)realloc(c[casella], sizeof(char) * j);
         }
 
         c[casella][j] = '\0';
@@ -79,7 +78,7 @@ char llegeixComanda(char *comanda){
         7 - EXIT
     */
     c = (char **)malloc(sizeof(char*));
-    c[0] = (char *)malloc(sizeof(char) * 20);
+    c[0] = (char *)malloc(sizeof(char));
 
     separaComanda(comanda, ' ', 0, 0);
 
@@ -92,7 +91,7 @@ char llegeixComanda(char *comanda){
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
         
-        c[1] = (char *)malloc(sizeof(char) * 5);
+        c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("SHOW AUDIOS"), 1);
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
@@ -105,7 +104,7 @@ char llegeixComanda(char *comanda){
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
 
-        c[1] = (char *)malloc(sizeof(char) * 5);
+        c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("CONNECT"), 1);
 
         //ens assegurem que hi hagi els arguments necessaris
@@ -119,7 +118,7 @@ char llegeixComanda(char *comanda){
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
 
-        c[1] = (char *)malloc(sizeof(char) * 5);
+        c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("SAY"), 1);
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
@@ -128,7 +127,7 @@ char llegeixComanda(char *comanda){
         else{
             //text
             c = (char **)realloc(c, sizeof(char*) * 3);
-            c[2] = (char *)malloc(sizeof(char) * 100);
+            c[2] = (char *)malloc(sizeof(char));
             separaComanda(comanda, '\n', strlen("SAY") + strlen(c[1]) + 1, 2);
             //ens assegurem que hi hagi els arguments necessaris
             if(c[2][0] == '\0'){
@@ -141,7 +140,7 @@ char llegeixComanda(char *comanda){
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
 
-        c[1] = (char *)malloc(sizeof(char) * 5);
+        c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, '\n', strlen("BROADCAST"), 1);
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
@@ -154,7 +153,7 @@ char llegeixComanda(char *comanda){
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
 
-        c[1] = (char *)malloc(sizeof(char) * 5);
+        c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("DOWNLOAD"), 1);
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
@@ -163,7 +162,7 @@ char llegeixComanda(char *comanda){
         else{
             //audio
             c = (char **)realloc(c, sizeof(char*) * 3);
-            c[2] = (char *)malloc(sizeof(char) * 100);
+            c[2] = (char *)malloc(sizeof(char));
             separaComanda(comanda, '\n', strlen("DOWNLOAD") + strlen(c[1]) + 1, 2);
             //ens assegurem que hi hagi els arguments necessaris
             if(c[2][0] == '\0'){
@@ -175,13 +174,13 @@ char llegeixComanda(char *comanda){
         opcio = 7;
         sizeofc = 0;
     }
-    /*else{
+    else{
         for (unsigned int i = 0; i <= strlen(comanda); i++)
         {
             printf("%d %c\n", comanda[i], comanda[i]);
         }
         
-    }*/
+    }
     return opcio;
 }
 

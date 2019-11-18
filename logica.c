@@ -1,20 +1,12 @@
 #include "logica.h"
 #include "network.h"
 
-<<<<<<< HEAD
-
 void optionExit(){
     write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
     
     //desconnectem sockets
     closeConnections();
-=======
-void optionExit(int socket){
-    write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
-    
-    //desconnectem sockets
-    close(socket);
->>>>>>> 482b8d103e219943f1de3531571662df521a76d8
+
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);
 }
