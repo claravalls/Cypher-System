@@ -278,39 +278,32 @@ Config lecturaFitxer(const char *fitxer){
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		config.sysports = (int *)malloc(sizeof(int) * 2);
+		config.sysports = (char **)malloc(sizeof(char) * 2);
 
-        aux = (char *)malloc(sizeof(char));
+        config.sysports[0] = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
 		{
-			aux[i] = cadena;
+			config.sysports[0][i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
+			config.sysports[0] = (char *)realloc(config.sysports[0], sizeof(char) * (i + 1));
 		}
-        aux[i] = '\0';
-
-		config.sysports[0] = atoi(aux);
-        free(aux);
+        config.sysports[0][i] = '\0';
 
 		//Sysport End
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
 
-        aux = (char *)malloc(sizeof(char));
+        config.sysports[1] = (char *)malloc(sizeof(char));
 		while (cadena != '\n' && nbytes > 0)
 		{
-			aux[i] = cadena;
+			config.sysports[1][i] = cadena;
 			i++;
 			nbytes = read(f, &cadena, 1);
-			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
+			config.sysports[1] = (char *)realloc(config.sysports[1], sizeof(char) * (i + 1));
 		}
-        aux[i] = '\0';
-
-		config.sysports[1] = atoi(aux);
-        free(aux);
-        
+        config.sysports[1][i] = '\0';        
 
         if (nbytes != 0) {
             nbytes = read(f, &cadena, 1);
@@ -318,7 +311,6 @@ Config lecturaFitxer(const char *fitxer){
 	}
 
 	close(f);
-
     return config;
 }
 

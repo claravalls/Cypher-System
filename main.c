@@ -54,7 +54,7 @@ int main(int argc, const char* argv[]){
 
         switch(opcio){
             case SHOW_CONNECTIONS:
-                optionShowC();
+                optionShowC(config.sysports);
             break;
 
             case CONNECT:
