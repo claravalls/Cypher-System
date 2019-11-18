@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -g
 LDFLAGS=-lpthread
-SOURCES=main.c manager.c logica.c network.c
+SOURCES=main.c manager.c logica.c network.c thread.c
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLE=p.exe
 

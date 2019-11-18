@@ -4,6 +4,24 @@
 char ** c;
 char sizeofc;
 
+char* readUntil(int fd, char end) {
+    int i = 0;
+    char c = '\0';
+    char* string = (char*)malloc(sizeof(char));
+
+    while (c != end) {
+        read(fd, &c, sizeof(char));
+        if (c != end) {
+            string = (char*)realloc(string, sizeof(char) * (i + 2));
+            string[i] = c;
+        }
+        i++;
+    }
+
+	string[i] = '\n';
+    return string;
+}
+
 /**
  * comanda: cadena sencera llegida
  * limit: caracter fins on hem de separar
@@ -24,6 +42,10 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     else{
         while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
+            
+            //printf("%d %c\n", c[casella][j], c[casella][j]);
+            
+
             i++;
             j++;
         }
@@ -85,6 +107,7 @@ char llegeixComanda(char *comanda){
 
         c[1] = (char *)malloc(sizeof(char) * 5);
         separaComanda(comanda, ' ', strlen("CONNECT"), 1);
+
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
             opcio = 0;
@@ -152,6 +175,13 @@ char llegeixComanda(char *comanda){
         opcio = 7;
         sizeofc = 0;
     }
+    /*else{
+        for (unsigned int i = 0; i <= strlen(comanda); i++)
+        {
+            printf("%d %c\n", comanda[i], comanda[i]);
+        }
+        
+    }*/
     return opcio;
 }
 
@@ -313,4 +343,8 @@ void alliberaMemoriaConfig(Config *config){
     free(config->ip);
     free(config->sysports);
     free(config->ipWeb);
+}
+
+char ** getValues(){
+    return c;
 }

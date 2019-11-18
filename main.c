@@ -6,35 +6,18 @@
 #include "logica.h"
 #include "manager.h"
 #include "network.h"
+#include "thread.h"
 
 Config config;
 
-static void *threadFunc (void *sockfd){
-    int newsock;
-    
-    while (1){
-        struct sockaddr_in s_addr;
-        socklen_t len = sizeof (s_addr);
-        int *socket = (int*) malloc(sizeof(int));
-        socket = (int*) (sockfd);
-        newsock = accept (*socket, (void *) &s_addr, &len);
-        if (newsock < 0) {
-            write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
-            break;
-        }
-        free(socket);
-        afegeixClient(newsock);
-    }
-    return (void *) sockfd;
-}
-
 int main(int argc, const char* argv[]){
-    char opcio, comanda[50];
+    char opcio;
+    char* comanda;
     char aux[50] = {0x0};
     int sockfd;
-    pthread_t t1;
+    char ** valors; //valors introduits a la comanda
 
-    if (argc < 2){
+    if (argc != 2){
         write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
     }
 
@@ -48,8 +31,11 @@ int main(int argc, const char* argv[]){
         return -1;
     }
 
-    pthread_create(&t1, NULL, threadFunc, &sockfd);  
+    setSockfd(sockfd);
+    config.sockfd = sockfd;
 
+    iniciaThread(&config); 
+     
     if (config.user == NULL)
     {
     	return -1;
@@ -57,15 +43,14 @@ int main(int argc, const char* argv[]){
 
     write(1, "\nStarting Trinity...\n", strlen("\nStarting Trinity...\n"));
 
-
     do{
         sprintf(aux, "\n$%s: ", config.user);
         write(1, aux, strlen(aux));
 
         //Llegir opcio introduida
-        strcpy(comanda, "");
-        read(0, comanda, 120);
+        comanda = readUntil(0, '\n');
         opcio = llegeixComanda(comanda);
+        valors = getValues();
 
         switch(opcio){
             case SHOW_CONNECTIONS:
@@ -73,7 +58,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case CONNECT:
-                optionConnect(config.port, config.ip, config.user, sockfd);
+                optionConnect(valors[1], config.ip);
             break;
 
             case SAY:
@@ -100,6 +85,7 @@ int main(int argc, const char* argv[]){
                 write(1,"Error, invalid option\n", strlen("Error, invalid option\n"));
         }
 
+        free(comanda);
         alliberaMemoriaC();
 
     }while(opcio != EXIT);

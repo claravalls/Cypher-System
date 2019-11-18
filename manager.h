@@ -17,5 +17,7 @@ void separaComanda(char *comanda, char limit, int i, int casella);
 char llegeixComanda(char * comanda);
 void alliberaMemoriaC();
 void alliberaMemoriaConfig(Config * config);
+char ** getValues();
+char* readUntil(int fd, char end);
 
 #endif

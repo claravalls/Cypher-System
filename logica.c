@@ -1,19 +1,19 @@
 #include "logica.h"
 #include "network.h"
 
+
 void optionExit(){
     write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
     
     //desconnectem sockets
-
+    closeConnections();
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);
 }
 
-void optionConnect(int port, char *ip, char *user, int sockfd){
+void optionConnect(char* port, char *ip){
     write(1,"Connecting...\n", strlen("Connecting...\n"));
-    connectClient(port, ip, user, sockfd);
-
+    connectClient(atoi(port), ip);
 }
 
 

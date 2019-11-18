@@ -13,14 +13,16 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "logica.h"
+#include "thread.h"
+#include "manager.h"
 
 #define ERR_ACCEPT "Error. No se pueden aceptar conexiones\n"
 #define ERR_SOCKET "Error creando el socket.\n"
 
 int connectServer(const char* ip, int port);
-int connectClient(int port, char * ip, char * user, int sockfd);
-static void *threadFunc (void *sockfd);
-void afegeixClient(int newsock);
+int connectClient(int port, char * ip);
+void afegeixClient(int newsock, char * user);
+void setSockfd(int fd);
+void closeConnections();
 
 #endif

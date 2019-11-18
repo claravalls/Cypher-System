@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include <pthread.h>
-
 #define SHOW_CONNECTIONS 1
 #define CONNECT 2
 #define SAY 3
@@ -27,16 +25,16 @@ typedef struct{
     int port;
     char *ipWeb;
     int *sysports;
+    int sockfd;
 }Config;
 
 void optionExit();
-void optionConnect();
+void optionConnect(char* port, char *ip);
 void optionDownload();
 void optionSay();
 void optionShowC();
 void optionShowA();
 void optionBroadcast();
 void stopAll();
-
 
 #endif
