@@ -75,7 +75,7 @@ int connectClient(int port, char * ip){
 
     strcpy(okMessage, "");
     sprintf (okMessage, "%d connected: %s", port, user);
-    //write (1, okMessage, strlen(okMessage));
+    write (1, okMessage, strlen(okMessage));
     return 0;
 }
 
