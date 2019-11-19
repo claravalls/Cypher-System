@@ -1,6 +1,7 @@
 #include "network.h"
 
-int *conn_clients, *conn_serv;
+int *conn_clients;
+Conn_serv *conn_serv;
 int qClients, qServ, mySock;
 
 void setSockfd(int fd){ //guardo el sockfd del meu servidor
@@ -34,7 +35,7 @@ int connectServer(const char* ip, int port){
 
     conn_clients = (int*) malloc (sizeof(int));
     qClients = 0;
-    conn_serv = (int*) malloc (sizeof(int));
+    conn_serv = (Conn_serv*) malloc (sizeof(Conn_serv));
     qServ = 0;
 
     return sockfd;
@@ -67,11 +68,15 @@ int connectClient(int port, char * ip){
         return 1;
     }
 
-    conn_serv = (int*)realloc(conn_serv, sizeof(int) * (qServ + 1));
-    conn_serv[qServ] = sockc;
-    qServ++;
+    conn_serv = (Conn_serv*)realloc(conn_serv, sizeof(Conn_serv) * (qServ + 1));
+    conn_serv[qServ].port = port;
+    conn_serv[qServ].sockfd = sockc;
     
-    user = readUntil(sockc, '\n');  
+    user = readUntil(sockc, '\n', '\n'); 
+    conn_serv[qServ].user = (char *) malloc(sizeof(char) * strlen(user));
+    strcpy(conn_serv[qServ].user, user); 
+
+    qServ++;
 
     strcpy(okMessage, "");
     sprintf (okMessage, "%d connected: %s", port, user);
@@ -79,14 +84,45 @@ int connectClient(int port, char * ip){
     return 0;
 }
 
+char * comprovaNomUsuari(char *port, int myPort){
+    int p = atoi(port);
+    char *missatge;
+
+    missatge = (char *) malloc(sizeof(char) * (strlen(port)));
+
+    //si és el meu servidor no el vull mostrar
+    if(p == myPort){
+        return NULL;
+    }
+    else{
+        strcpy(missatge, port);
+        strcat(missatge, "\n");
+
+        for (int i = 0; i < qServ; i++)
+        {
+            if (conn_serv[i].port == p){
+                missatge = (char *) realloc(missatge, (sizeof(char) * 7));
+                strcpy(missatge, "");
+                sprintf(missatge, "%d %s", p, conn_serv[i].user);
+                break;
+            }
+        }
+    }
+    return missatge;
+}
+
 void closeConnections(){
     write(1, "Closing all connections...\n", strlen("Closing all connections...\n"));
     close(mySock);
     for (int i = 0; i < qServ; i++){
-        close(conn_serv[qServ]);
+        close(conn_serv[i].sockfd);
+        free(conn_serv[i].user);
     }
+    free(conn_serv);
+    
     for (int i = 0; i < qClients; i++){
-        close(conn_clients[qClients]);
+        close(conn_clients[i]);
     }
+    free(conn_clients);
 }
 

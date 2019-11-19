@@ -4,7 +4,7 @@
 char ** c;
 char sizeofc;
 
-char* readUntil(int fd, char end) {
+char* readUntil(int fd, char end, char lastChar) {
     int i = 0;
     char c = '\0';
     char* string = (char*)malloc(sizeof(char));
@@ -18,7 +18,7 @@ char* readUntil(int fd, char end) {
         i++;
     }
 
-	string[i - 1] = '\n';
+	string[i - 1] = lastChar;
     return string;
 }
 
@@ -338,4 +338,31 @@ void alliberaMemoriaConfig(Config *config){
 
 char ** getValues(){
     return c;
+}
+
+void buscaPorts(int pipe, int myPort){
+    ssize_t nbytes;
+	unsigned char c;
+    char *port, *extra, *connexio;
+
+    nbytes = read(pipe, &c, 1);
+    while (nbytes > 0){
+        //llegeixo "port"
+        extra = readUntil(pipe, ' ', '\n');
+        free(extra);
+
+        //llegeixo el numero del port
+        port = readUntil(pipe, ' ', '\0');
+        //comprovo si se el nom de l'usuari
+        connexio = comprovaNomUsuari(port, myPort);
+
+        if(connexio != NULL) //comprovem que no es mostri el nostre port
+            write(1, connexio, strlen(connexio));
+
+        //llegeixo el que queda
+        extra = readUntil(pipe, '\n', '\n');
+        free(extra);
+
+        nbytes = read(pipe, &c, 1);
+    }
 }

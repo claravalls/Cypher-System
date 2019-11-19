@@ -19,10 +19,17 @@
 #define ERR_ACCEPT "Error. No se pueden aceptar conexiones\n"
 #define ERR_SOCKET "Error creando el socket.\n"
 
+typedef struct {
+    int port;
+    int sockfd;
+    char *user;
+}Conn_serv;
+
 int connectServer(const char* ip, int port);
 int connectClient(int port, char * ip);
 void afegeixClient(int newsock, char * user);
 void setSockfd(int fd);
 void closeConnections();
+char * comprovaNomUsuari(char *port, int myPort);
 
 #endif

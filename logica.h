@@ -33,7 +33,7 @@ void optionExit();
 void optionConnect(char* port, char *ip);
 void optionDownload();
 void optionSay();
-void optionShowC(char ** sysports);
+void optionShowC(char ** sysports, int myPort);
 void optionShowA();
 void optionBroadcast();
 void stopAll();

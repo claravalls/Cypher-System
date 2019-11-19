@@ -48,13 +48,13 @@ int main(int argc, const char* argv[]){
         write(1, aux, strlen(aux));
 
         //Llegir opcio introduida
-        comanda = readUntil(0, '\n');
+        comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
         valors = getValues();
 
         switch(opcio){
             case SHOW_CONNECTIONS:
-                optionShowC(config.sysports);
+                optionShowC(config.sysports, config.port);
             break;
 
             case CONNECT:
