@@ -174,13 +174,7 @@ char llegeixComanda(char *comanda){
         opcio = 7;
         sizeofc = 0;
     }
-    else{
-        for (unsigned int i = 0; i <= strlen(comanda); i++)
-        {
-            printf("%d %c\n", comanda[i], comanda[i]);
-        }
-        
-    }
+    
     return opcio;
 }
 

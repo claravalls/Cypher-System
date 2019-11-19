@@ -9,6 +9,8 @@ void setSockfd(int fd){ //guardo el sockfd del meu servidor
 }
 
 void afegeixClient(int newsock, char* user){
+    printf("\nNou client %d user: %s\n", newsock, user);
+    
     conn_clients = (int*)realloc(conn_clients, sizeof(int) * (qClients + 1));
     conn_clients[qClients] = newsock;
     qClients++;

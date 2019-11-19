@@ -19,7 +19,6 @@ void optionConnect(char* port, char *ip){
 
 void optionSay(){
 
-
 }
 
 void optionShowC(char ** sysports, int myPort){
@@ -31,7 +30,7 @@ void optionShowC(char ** sysports, int myPort){
 	
     write(1,"Testing...\n", strlen("Testing...\n"));
 
-    if (pipe(fd)==-1){
+    if (pipe(fd) == -1){
         write(1, "Can not create pipe\n", strlen ("Can not create pipe\n"));
         exit(-1);
     }
@@ -57,19 +56,21 @@ void optionShowC(char ** sysports, int myPort){
             //output = open("output", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
             dup2(fd[1], 1);
 
-            //executaem show_connections.sh
+            //executem show_connections.sh
             if(execvp(argv[0], argv) < 0){
+                dup2(1, fd[1]);
                 write(1, "Can not show connections\n", strlen("Can not show connections\n"));
             } 
-            close(fd[1]);           
+
+            //HAIG DE TANCAR FD[1]??
             break;
         case -1:
             write(1, "Can not show connections\n", strlen("Can not show connections\n"));
             break;
         default:
-            close(fd[1]);
             //esperem que acabi d'escriure
             wait(NULL);
+            close(fd[1]);
             //llegim del pipe i busquem els ports
             buscaPorts(fd[0], myPort);
             close(fd[0]);
