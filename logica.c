@@ -11,9 +11,9 @@ void optionExit(){
     signal(SIGINT, SIG_DFL);
 }
 
-void optionConnect(char* port, char *ip){
+void optionConnect(char* port, char *ip, char *username){
     write(1,"Connecting...\n", strlen("Connecting...\n"));
-    connectClient(atoi(port), ip);
+    connectClient(atoi(port), ip, username);
 }
 
 
@@ -22,7 +22,7 @@ void optionSay(){
 }
 
 void optionShowC(char ** sysports, int myPort){
-    char * argv[4];
+    char * argv[4] = {"./show_connections.sh", sysports[0], sysports[1], NULL};
     int fd[2];
     /*int *connAvailable;
 
@@ -39,26 +39,10 @@ void optionShowC(char ** sysports, int myPort){
     switch (pid){
         case 0:
             close(fd[0]);
-            //creem els arguments
-            argv[0] = (char *)malloc(sizeof(char)*22);
-            strcpy(argv[0], "./show_connections.sh");
-            
-            argv[1] = (char *)malloc(sizeof(char)*strlen(sysports[0]));
-            strcpy(argv[1], sysports[0]);
-
-            argv[2] = (char *)malloc(sizeof(char)*strlen(sysports[1]));
-            strcpy(argv[2], sysports[1]);
-            
-            //L'últim argument ha de ser NULL. L'afegim
-            argv[3] = NULL;
-
-            //redireccionem la sortida al pipe
-            //output = open("output", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
             dup2(fd[1], 1);
 
             //executem show_connections.sh
             if(execvp(argv[0], argv) < 0){
-                dup2(1, fd[1]);
                 write(1, "Can not show connections\n", strlen("Can not show connections\n"));
             } 
 

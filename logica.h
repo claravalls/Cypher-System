@@ -30,7 +30,7 @@ typedef struct{
 }Config;
 
 void optionExit();
-void optionConnect(char* port, char *ip);
+void optionConnect(char* port, char *ip, char *username);
 void optionDownload();
 void optionSay();
 void optionShowC(char ** sysports, int myPort);

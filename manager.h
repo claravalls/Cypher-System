@@ -13,6 +13,8 @@
 #include "logica.h"
 #include "network.h"
 
+#define CONN_AVAIL "%d connections available\n"
+
 Config lecturaFitxer(const char *fitxer);
 void separaComanda(char *comanda, char limit, int i, int casella);
 char llegeixComanda(char * comanda);

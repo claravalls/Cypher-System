@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case CONNECT:
-                optionConnect(valors[1], config.ip);
+                optionConnect(valors[1], config.ip, config.user);
             break;
 
             case SAY:

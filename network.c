@@ -8,14 +8,11 @@ void setSockfd(int fd){ //guardo el sockfd del meu servidor
     mySock = fd;
 }
 
-void afegeixClient(int newsock, char* user){
-    printf("\nNou client %d user: %s\n", newsock, user);
-    
+void afegeixClient(int newsock, char* user){    
     conn_clients = (int*)realloc(conn_clients, sizeof(int) * (qClients + 1));
     conn_clients[qClients] = newsock;
     qClients++;
-    write(newsock, user, strlen(user));
-    write(newsock, "\n", 1);
+    enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 }
 
 int connectServer(const char* ip, int port){
@@ -43,7 +40,7 @@ int connectServer(const char* ip, int port){
     return sockfd;
 }
 
-int connectClient(int port, char * ip){
+int connectClient(int port, char *ip, char *myUsername){
     char okMessage[50];
     char * user;
 
@@ -67,23 +64,29 @@ int connectClient(int port, char * ip){
         strcpy(okMessage, "");
         sprintf(okMessage, "Error a la connexió de l'adreça %s en el port %d\n", ip, port);
         write(1, okMessage, strlen(okMessage));
-        return 1;
+        return -1;
     }
+    
+    enviaPaquet(sockc, 0x01, "[TR_NAME]", strlen(myUsername), myUsername);
 
     conn_serv = (Conn_serv*)realloc(conn_serv, sizeof(Conn_serv) * (qServ + 1));
     conn_serv[qServ].port = port;
     conn_serv[qServ].sockfd = sockc;
+
+    user = llegeixPaquet(sockc);
     
-    user = readUntil(sockc, '\n', '\n'); 
-    conn_serv[qServ].user = (char *) malloc(sizeof(char) * strlen(user));
-    strcpy(conn_serv[qServ].user, user); 
+    if (user != NULL){
+        conn_serv[qServ].user = (char *) malloc(sizeof(char) * strlen(user));
+        strcpy(conn_serv[qServ].user, user); 
 
-    qServ++;
+        qServ++;
 
-    strcpy(okMessage, "");
-    sprintf (okMessage, "%d connected: %s", port, user);
-    write (1, okMessage, strlen(okMessage));
-    return 0;
+        strcpy(okMessage, "");
+        sprintf (okMessage, "%d connected: %s", port, user);
+        write (1, okMessage, strlen(okMessage));
+        return 0;
+    }
+    return 1;
 }
 
 char * comprovaNomUsuari(char *port, int myPort){
@@ -105,11 +108,50 @@ char * comprovaNomUsuari(char *port, int myPort){
             if (conn_serv[i].port == p){
                 missatge = (char *) realloc(missatge, (sizeof(char) * 7));
                 strcpy(missatge, "");
-                sprintf(missatge, "%d %s", p, conn_serv[i].user);
+                sprintf(missatge, "\n%d %s\n", p, conn_serv[i].user);
                 break;
             }
         }
     }
+    return missatge;
+}
+
+void enviaPaquet(int fd, char type, char* header, int length, char* data){
+    Protocol p;
+    p.type = type;
+    p.header = (char*) malloc(sizeof(char) * strlen(header));
+    strcpy (p.header, header);
+    p.length = length;
+    p.data = (char*) malloc(sizeof(char) * length);
+    strcpy(p.data, data);
+
+    write(fd, &p.type, 1);
+    write(fd, p.header, strlen(p.header));
+    write(fd, &p.length, 2);
+    write(fd, p.data, strlen(data));
+}
+
+char* llegeixPaquet(int fd){
+    char type, *header, *missatge;
+    int length;
+    ssize_t nbytes;
+
+    nbytes = read(fd, &type, 1);
+    if (nbytes == 0){
+        return NULL;
+    }
+
+    header = readUntil(fd, ']', ']');
+    
+    if(strcpy(header, "[CONKO]") == 0){
+        return NULL;
+    }
+    read(fd, &length, 2);
+
+    missatge = (char *) malloc(sizeof(char) * length);
+    read(fd, missatge, length);
+
+    free(header);
     return missatge;
 }
 

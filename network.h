@@ -25,11 +25,20 @@ typedef struct {
     char *user;
 }Conn_serv;
 
-int connectServer(const char* ip, int port);
-int connectClient(int port, char * ip);
+typedef struct{
+    unsigned char type;
+    char * header;
+    unsigned int length;
+    char * data;
+}Protocol;
+
+int connectServer(const char *ip, int port);
+int connectClient(int port, char *ip, char *username);
 void afegeixClient(int newsock, char * user);
 void setSockfd(int fd);
 void closeConnections();
 char * comprovaNomUsuari(char *port, int myPort);
+void enviaPaquet(int fd, char type, char *header, int length, char *data);
+char * llegeixPaquet(int fd);
 
 #endif
