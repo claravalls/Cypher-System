@@ -1,6 +1,6 @@
 #include "network.h"
 
-int *conn_clients;
+Conn_cli *conn_clients;
 Conn_serv *conn_serv;
 int qClients, qServ, mySock;
 
@@ -8,9 +8,10 @@ void setSockfd(int fd){ //guardo el sockfd del meu servidor
     mySock = fd;
 }
 
-void afegeixClient(int newsock, char* user){    
-    conn_clients = (int*)realloc(conn_clients, sizeof(int) * (qClients + 1));
-    conn_clients[qClients] = newsock;
+void afegeixClient(int newsock, char* user, char *clientName){    
+    conn_clients = (Conn_cli*)realloc(conn_clients, sizeof(Conn_cli) * (qClients + 1));
+    conn_clients[qClients].sockfd = newsock;
+    conn_clients[qClients].user = clientName;
     qClients++;
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 }
@@ -32,7 +33,7 @@ int connectServer(const char* ip, int port){
 
     listen (sockfd, 3);
 
-    conn_clients = (int*) malloc (sizeof(int));
+    conn_clients = (Conn_cli*) malloc (sizeof(Conn_cli));
     qClients = 0;
     conn_serv = (Conn_serv*) malloc (sizeof(Conn_serv));
     qServ = 0;
@@ -76,8 +77,7 @@ int connectClient(int port, char *ip, char *myUsername){
     user = llegeixPaquet(sockc);
     
     if (user != NULL){
-        conn_serv[qServ].user = (char *) malloc(sizeof(char) * strlen(user));
-        strcpy(conn_serv[qServ].user, user); 
+        conn_serv[qServ].user = user; 
 
         qServ++;
 
@@ -165,7 +165,8 @@ void closeConnections(){
     free(conn_serv);
     
     for (int i = 0; i < qClients; i++){
-        close(conn_clients[i]);
+        close(conn_clients[i].sockfd);
+        free(conn_clients[i].user);
     }
     free(conn_clients);
 }

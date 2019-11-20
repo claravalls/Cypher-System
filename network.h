@@ -29,6 +29,11 @@ typedef struct {
     char *user;
 }Conn_serv;
 
+typedef struct {
+    int sockfd;
+    char *user;
+}Conn_cli;
+
 typedef struct{
     unsigned char type;
     char * header;
@@ -38,7 +43,7 @@ typedef struct{
 
 int connectServer(const char *ip, int port);
 int connectClient(int port, char *ip, char *username);
-void afegeixClient(int newsock, char * user);
+void afegeixClient(int newsock, char * user, char *clientName);
 void setSockfd(int fd);
 void closeConnections();
 char * comprovaNomUsuari(char *port, int myPort);

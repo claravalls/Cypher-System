@@ -31,8 +31,7 @@ static void *threadFunc (void *config){
             close(newsock);
         }
         else {
-            //potser haure d'enviar el clientName. No se si el servidor necessita el nom dels seus clients
-            afegeixClient(newsock, c->user);
+            afegeixClient(newsock, c->user, clientName);
         }
     }
     return (void *) c;
