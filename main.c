@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]){
     char ** valors; //valors introduits a la comanda
 
     if (argc != 2){
-        write(1, "Not enough arguments\n", strlen("Not enough arguments\n"));
+        write(1, ERR_ARGS, strlen(ERR_ARGS));
     }
 
     signal(SIGINT, stopAll);
@@ -41,7 +41,7 @@ int main(int argc, const char* argv[]){
     	return -1;
     }
 
-    write(1, "\nStarting Trinity...\n", strlen("\nStarting Trinity...\n"));
+    write(1, STARTING, strlen(STARTING));
 
     do{
         sprintf(aux, "\n$%s: ", config.user);
@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]){
             break;
 
             default:
-                write(1,"Error, invalid option\n", strlen("Error, invalid option\n"));
+                write(1, ERR_OPTION, strlen(ERR_OPTION));
         }
 
         free(comanda);

@@ -13,6 +13,7 @@
 #include "logica.h"
 #include "network.h"
 
+#define ERR_FILE "Error opening file...\n"
 #define CONN_AVAIL "%d connections available\n"
 
 Config lecturaFitxer(const char *fitxer);

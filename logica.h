@@ -19,6 +19,15 @@
 #define DOWNLOAD 6 
 #define EXIT 7
 
+#define DISCONNECT "Disconnecting Trinity...\n"
+#define CONNECTING "Connecting...\n"
+#define TESTING "Testing...\n"
+#define ERR_PIPE "Can not create pipe\n"
+#define ERR_CONN "Can not show connections\n"
+#define STARTING "\nStarting Trinity...\n"
+#define ERR_OPTION "Error, invalid option\n"
+#define ERR_ARGS "Not enough arguments\n"
+
 typedef struct{
     char *user;
     char *dirAudios;

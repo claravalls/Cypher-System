@@ -36,14 +36,12 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     }
 
     if(comanda[i] == '\n'){
-        write(1, "Not enough arguments.\n", strlen("Not enough arguments.\n"));
+        write(1, ERR_ARGS, strlen(ERR_ARGS));
         c[casella][0] = '\0';
     }
     else{
         while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
-            
-            //printf("%d %c\n", c[casella][j], c[casella][j]);
             i++;
             j++;
             c[casella] = (char *)realloc(c[casella], sizeof(char) * j);
@@ -189,7 +187,7 @@ Config lecturaFitxer(const char *fitxer){
     f = open(fitxer, O_RDONLY);
     if (f < 0)
     {
-    	write(1, "Error opening file...\n", strlen("Error opening file...\n"));
+    	write(1, ERR_FILE, strlen(ERR_FILE));
 		config.user = NULL;
 	}
 
@@ -316,7 +314,6 @@ void alliberaMemoriaC(){
     {
         free(c[i]);
     }
-    
     free(c);
 }
 

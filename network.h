@@ -16,8 +16,12 @@
 #include "thread.h"
 #include "manager.h"
 
-#define ERR_ACCEPT "Error. No se pueden aceptar conexiones\n"
-#define ERR_SOCKET "Error creando el socket.\n"
+#define ERR_IP "Invalid IP adress\n"
+#define ERR_CON_PORT "Error connecting %s in %d port\n"
+#define ERR_ACCEPT "Error. Can not accept connections\n"
+#define ERR_SOCKET "Error. Can not create socket.\n"
+#define OK_CONN "%d connected: %s"
+#define CLOSING "Closing all connections...\n"
 
 typedef struct {
     int port;

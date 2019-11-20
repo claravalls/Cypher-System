@@ -2,7 +2,7 @@
 #include "network.h"
 
 void optionExit(){
-    write(1,"Disconnecting Trinity...\n", strlen("Disconnecting Trinity...\n"));
+    write(1,DISCONNECT, strlen(DISCONNECT));
     
     //desconnectem sockets
     closeConnections();
@@ -12,7 +12,7 @@ void optionExit(){
 }
 
 void optionConnect(char* port, char *ip, char *username){
-    write(1,"Connecting...\n", strlen("Connecting...\n"));
+    write(1, CONNECTING, CONNECTING);
     connectClient(atoi(port), ip, username);
 }
 
@@ -28,10 +28,10 @@ void optionShowC(char ** sysports, int myPort){
 
 	connAvailable = malloc(sizeof(int));*/
 	
-    write(1,"Testing...\n", strlen("Testing...\n"));
+    write(1, TESTING, strlen(TESTING));
 
     if (pipe(fd) == -1){
-        write(1, "Can not create pipe\n", strlen ("Can not create pipe\n"));
+        write(1, ERR_PIPE, strlen (ERR_PIPE));
         exit(-1);
     }
     
@@ -43,13 +43,13 @@ void optionShowC(char ** sysports, int myPort){
 
             //executem show_connections.sh
             if(execvp(argv[0], argv) < 0){
-                write(1, "Can not show connections\n", strlen("Can not show connections\n"));
+                write(1, ERR_CONN, strlen(ERR_CONN));
             } 
 
             //HAIG DE TANCAR FD[1]??
             break;
         case -1:
-            write(1, "Can not show connections\n", strlen("Can not show connections\n"));
+            write(1, ERR_CONN, strlen(ERR_CONN));
             break;
         default:
             //esperem que acabi d'escriure

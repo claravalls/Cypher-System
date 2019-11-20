@@ -56,13 +56,13 @@ int connectClient(int port, char *ip, char *myUsername){
     s_addr.sin_port = htons (port);
 
     if (inet_aton (ip, &s_addr.sin_addr) == 0) {
-        write (1, "No es una adrea IP valida\n", strlen("No es una adrea IP valida\n"));
+        write (1, ERR_IP, strlen(ERR_IP));
         return -1;
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
         strcpy(okMessage, "");
-        sprintf(okMessage, "Error a la connexió de l'adreça %s en el port %d\n", ip, port);
+        sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
         return -1;
     }
@@ -82,7 +82,7 @@ int connectClient(int port, char *ip, char *myUsername){
         qServ++;
 
         strcpy(okMessage, "");
-        sprintf (okMessage, "%d connected: %s", port, user);
+        sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
         return 0;
     }
@@ -156,7 +156,7 @@ char* llegeixPaquet(int fd){
 }
 
 void closeConnections(){
-    write(1, "Closing all connections...\n", strlen("Closing all connections...\n"));
+    write(1, CLOSING, strlen(CLOSING));
     close(mySock);
     for (int i = 0; i < qServ; i++){
         close(conn_serv[i].sockfd);
