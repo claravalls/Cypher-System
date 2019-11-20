@@ -12,7 +12,7 @@ void optionExit(){
 }
 
 void optionConnect(char* port, char *ip, char *username){
-    write(1, CONNECTING, CONNECTING);
+    write(1, CONNECTING, strlen(CONNECTING));
     connectClient(atoi(port), ip, username);
 }
 
