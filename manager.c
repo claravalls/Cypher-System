@@ -36,7 +36,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     }
 
     if(comanda[i] == '\n'){
-        write(1, "Not enough arguments.\n", strlen("Not enough arguments.\n"));
+        write(1, ERR_ARGS, strlen(ERR_ARGS));
         c[casella][0] = '\0';
     }
     else{
@@ -188,7 +188,7 @@ Config lecturaFitxer(const char *fitxer){
     f = open(fitxer, O_RDONLY);
     if (f < 0)
     {
-    	write(1, "Error opening file...\n", strlen("Error opening file...\n"));
+    	write(1, ERR_FILE, strlen(ERR_FILE));
 		config.user = NULL;
 	}
 
@@ -315,7 +315,6 @@ void alliberaMemoriaC(){
     {
         free(c[i]);
     }
-    
     free(c);
 }
 
@@ -336,8 +335,11 @@ char ** getValues(){
 void buscaPorts(int pipe, int myPort){
     ssize_t nbytes;
 	unsigned char c;
-    char *port, *extra, *connexio;
+    char *port, *extra, *missatge, *aux;
+    char **connexions;
+    int nConn = 0;
 
+    connexions = (char **) malloc(sizeof(char*));
     nbytes = read(pipe, &c, 1);
     while (nbytes > 0){
         //llegeixo "port"
@@ -346,16 +348,33 @@ void buscaPorts(int pipe, int myPort){
 
         //llegeixo el numero del port
         port = readUntil(pipe, ' ', '\0');
+
         //comprovo si se el nom de l'usuari
-        connexio = comprovaNomUsuari(port, myPort);
+        missatge = comprovaNomUsuari(port, myPort);
 
-        if(connexio != NULL) //comprovem que no es mostri el nostre port
-            write(1, connexio, strlen(connexio));
-
+        if(missatge != NULL){ //comprovem que no es mostri el nostre port
+            connexions = (char **) realloc(connexions, sizeof(char *) * (nConn + 1));
+            connexions[nConn] = missatge;
+            nConn++;
+        } 
         //llegeixo el que queda
         extra = readUntil(pipe, '\n', '\n');
         free(extra);
 
         nbytes = read(pipe, &c, 1);
+
     }
+
+    aux = (char *) malloc(sizeof(char) * strlen(CONN_AVAIL));
+    sprintf(aux, CONN_AVAIL, nConn);
+    write(1, aux, strlen(aux));
+    free(aux);
+
+    for (int i = 0; i < nConn; i++)
+    {
+        write(1, connexions[i], strlen(connexions[i]));
+        free(connexions[i]);
+    }
+
+    free(connexions);
 }

@@ -16,8 +16,12 @@
 #include "thread.h"
 #include "manager.h"
 
-#define ERR_ACCEPT "Error. No se pueden aceptar conexiones\n"
-#define ERR_SOCKET "Error creando el socket.\n"
+#define ERR_IP "Invalid IP adress\n"
+#define ERR_CON_PORT "Error connecting %s in %d port\n"
+#define ERR_ACCEPT "Error. Can not accept connections\n"
+#define ERR_SOCKET "Error. Can not create socket.\n"
+#define OK_CONN "%d connected: %s"
+#define CLOSING "Closing all connections...\n"
 
 typedef struct {
     int port;
@@ -25,11 +29,25 @@ typedef struct {
     char *user;
 }Conn_serv;
 
-int connectServer(const char* ip, int port);
-int connectClient(int port, char * ip);
-void afegeixClient(int newsock, char * user);
+typedef struct {
+    int sockfd;
+    char *user;
+}Conn_cli;
+
+typedef struct{
+    unsigned char type;
+    char * header;
+    unsigned int length;
+    char * data;
+}Protocol;
+
+int connectServer(const char *ip, int port);
+int connectClient(int port, char *ip, char *username);
+void afegeixClient(int newsock, char * user, char *clientName);
 void setSockfd(int fd);
 void closeConnections();
 char * comprovaNomUsuari(char *port, int myPort);
+void enviaPaquet(int fd, char type, char *header, int length, char *data);
+char * llegeixPaquet(int fd);
 
 #endif
