@@ -22,17 +22,8 @@
 #define ERR_SOCKET "Error. Can not create socket.\n"
 #define OK_CONN "%d connected: %s"
 #define CLOSING "Closing all connections...\n"
-
-typedef struct {
-    int port;
-    int sockfd;
-    char *user;
-}Conn_serv;
-
-typedef struct {
-    int sockfd;
-    char *user;
-}Conn_cli;
+#define MESSAGE "\n[%s]: %s\n"
+#define ERR_USER "This user does not exists\n"
 
 typedef struct{
     unsigned char type;
@@ -48,6 +39,8 @@ void setSockfd(int fd);
 void closeConnections();
 char * comprovaNomUsuari(char *port, int myPort);
 void enviaPaquet(int fd, char type, char *header, int length, char *data);
-char * llegeixPaquet(int fd);
+Protocol llegeixPaquet(int fd);
+void imprimeixMissatge(char *missatge, char* user);
+void enviaMissatge(char *user, char *missatge);
 
 #endif

@@ -1,7 +1,7 @@
 #include "network.h"
 
-Conn_cli *conn_clients;
-Conn_serv *conn_serv;
+Conn_cli *conn_clients; //els que s'han conectat
+Conn_serv *conn_serv; //a qui m'he connectat
 int qClients, qServ, mySock;
 
 void setSockfd(int fd){ //guardo el sockfd del meu servidor
@@ -14,6 +14,9 @@ void afegeixClient(int newsock, char* user, char *clientName){
     conn_clients[qClients].user = clientName;
     qClients++;
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
+
+    //creem el thread del client
+    iniciaThreadClient(&conn_clients[qClients - 1]);
 }
 
 int connectServer(const char* ip, int port){
@@ -44,6 +47,7 @@ int connectServer(const char* ip, int port){
 int connectClient(int port, char *ip, char *myUsername){
     char okMessage[50];
     char * user;
+    Protocol p;
 
     int sockc = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockc < 0) {
@@ -74,7 +78,8 @@ int connectClient(int port, char *ip, char *myUsername){
     conn_serv[qServ].port = port;
     conn_serv[qServ].sockfd = sockc;
 
-    user = llegeixPaquet(sockc);
+    p = llegeixPaquet(sockc);
+    user = p.data;
     
     if (user != NULL){
         conn_serv[qServ].user = user; 
@@ -131,28 +136,30 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     write(fd, p.data, strlen(data));
 }
 
-char* llegeixPaquet(int fd){
-    char type, *header, *missatge;
+Protocol llegeixPaquet(int fd){
+    char type, *header, *data;
     int length;
     ssize_t nbytes;
+    Protocol p;
 
     nbytes = read(fd, &type, 1);
     if (nbytes == 0){
-        return NULL;
+        p.data = NULL;
+        return p;
     }
 
     header = readUntil(fd, ']', ']');
-    
-    if(strcpy(header, "[CONKO]") == 0){
-        return NULL;
-    }
+
     read(fd, &length, 2);
 
-    missatge = (char *) malloc(sizeof(char) * length);
-    read(fd, missatge, length);
+    data = (char *) malloc(sizeof(char) * length);
+    read(fd, data, length);
 
-    free(header);
-    return missatge;
+    p.type = type;
+    p.header = header;
+    p.length = length;
+    p.data = data;
+    return p;
 }
 
 void closeConnections(){
@@ -171,3 +178,25 @@ void closeConnections(){
     free(conn_clients);
 }
 
+void imprimeixMissatge(char *missatge, char* user){
+    char *aux;
+    aux = (char*) malloc(sizeof(char) * strlen(MESSAGE));
+    sprintf(aux, MESSAGE, user, missatge);
+    write(1, aux, strlen(aux));
+    free(aux);
+}
+
+void enviaMissatge(char *user, char *missatge){
+    int sockfd = 0;
+    for (int i = 0; i < qServ; i++)
+    {
+        if(strcmp(conn_serv[i].user, user) == 0){
+            sockfd = conn_serv[i].sockfd;
+            enviaPaquet(sockfd, 0x02, "[MSG]", strlen(missatge), missatge);
+            break;
+        }
+    }
+    if(sockfd == 0){
+        write(1, ERR_USER, strlen(ERR_USER));
+    }
+}

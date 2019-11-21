@@ -17,8 +17,8 @@ void optionConnect(char* port, char *ip, char *username){
 }
 
 
-void optionSay(){
-
+void optionSay(char ** comanda){
+    enviaMissatge(comanda[1], comanda[2]);
 }
 
 void optionShowC(char ** sysports, int myPort){

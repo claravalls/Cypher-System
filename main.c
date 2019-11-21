@@ -13,7 +13,6 @@ Config config;
 int main(int argc, const char* argv[]){
     char opcio;
     char* comanda;
-    char aux[50] = {0x0};
     int sockfd;
     char ** valors; //valors introduits a la comanda
 
@@ -25,6 +24,8 @@ int main(int argc, const char* argv[]){
 
     config = lecturaFitxer(argv[1]);
 
+    setConfig(config);
+
     sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
         write(1, ERR_SOCKET, strlen(ERR_SOCKET));
@@ -34,7 +35,7 @@ int main(int argc, const char* argv[]){
     setSockfd(sockfd);
     config.sockfd = sockfd;
 
-    iniciaThread(&config); 
+    iniciaThreadServidor(&config); 
      
     if (config.user == NULL)
     {
@@ -43,10 +44,8 @@ int main(int argc, const char* argv[]){
 
     write(1, STARTING, strlen(STARTING));
 
-    do{
-        sprintf(aux, "\n$%s: ", config.user);
-        write(1, aux, strlen(aux));
-
+    do{  
+        imprimeixPrompt(config);
         //Llegir opcio introduida
         comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
@@ -62,7 +61,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case SAY:
-                optionSay();
+                optionSay(getValues());
             break;
 
             case BROADCAST:

@@ -11,10 +11,22 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
+
 #include "network.h"
 #include "logica.h"
 
+typedef struct {
+    int port;
+    int sockfd;
+    char *user;
+}Conn_serv;
 
-void iniciaThread(Config* config);
+typedef struct {
+    int sockfd;
+    char *user;
+}Conn_cli;
+
+void iniciaThreadServidor(Config *config);
+void iniciaThreadClient(Conn_cli *client);
 
 #endif

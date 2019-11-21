@@ -3,7 +3,18 @@
 
 char ** c;
 char sizeofc;
+Config config;
 
+void setConfig(Config c){
+    config = c;
+}
+void imprimeixPrompt(){
+    char *aux;
+    aux = (char*) malloc(sizeof(char) * strlen(PROMPT));
+    sprintf(aux, PROMPT, config.user);
+    write(1, aux, strlen(aux));
+    free(aux);
+}
 char* readUntil(int fd, char end, char lastChar) {
     int i = 0;
     char c = '\0';

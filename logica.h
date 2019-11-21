@@ -41,7 +41,7 @@ typedef struct{
 void optionExit();
 void optionConnect(char* port, char *ip, char *username);
 void optionDownload();
-void optionSay();
+void optionSay(char ** comanda);
 void optionShowC(char ** sysports, int myPort);
 void optionShowA();
 void optionBroadcast();
