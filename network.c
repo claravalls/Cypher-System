@@ -120,20 +120,20 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     Protocol p;
     p.type = type;
     p.header = (char*) malloc(sizeof(char) * strlen(header));
-    strcpy (p.header, header);
+    p.header = header;
     p.length = length;
     p.data = (char*) malloc(sizeof(char) * length);
-    strcpy(p.data, data);
+    p.data = data;
 
     write(fd, &p.type, 1);
     write(fd, p.header, strlen(p.header));
     write(fd, &p.length, 2);
-    write(fd, p.data, strlen(data));
+    write(fd, p.data, strlen(p.data));
 }
 
 char* llegeixPaquet(int fd){
     char type, *header, *missatge;
-    int length;
+    int length=0;
     ssize_t nbytes;
 
     nbytes = read(fd, &type, 1);
@@ -143,7 +143,7 @@ char* llegeixPaquet(int fd){
 
     header = readUntil(fd, ']', ']');
     
-    if(strcpy(header, "[CONKO]") == 0){
+    if(strcasecmp(header, "[CONKO]") == 0){
         return NULL;
     }
     read(fd, &length, 2);

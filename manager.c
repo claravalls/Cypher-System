@@ -42,7 +42,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     else{
         while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
-            
+
             i++;
             j++;
             c[casella] = (char *)realloc(c[casella], sizeof(char) * (j+1));
@@ -58,6 +58,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
                 c[casella][j] = comanda[i];
                 i++;
                 j++;
+                c[casella] = (char *)realloc(c[casella], sizeof(char) * (j+1));
             }
 
             c[casella][j] = '\0';
@@ -311,7 +312,7 @@ Config lecturaFitxer(const char *fitxer){
 
 void alliberaMemoriaC(){
     //alliberem memòria de c
-    for (int i = 0; i <= sizeofc; i++)
+    for (int i = 0; i < sizeofc; i++)
     {
         free(c[i]);
     }
