@@ -14,6 +14,7 @@
 #include "network.h"
 #include "logica.h"
 
+
 void iniciaThread(Config* config);
 
 #endif

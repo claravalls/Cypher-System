@@ -43,10 +43,9 @@ void separaComanda(char *comanda, char limit, int i, int casella){
         while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
             
-            //printf("%d %c\n", c[casella][j], c[casella][j]);
             i++;
             j++;
-            c[casella] = (char *)realloc(c[casella], sizeof(char) * j);
+            c[casella] = (char *)realloc(c[casella], sizeof(char) * (j+1));
         }
 
         c[casella][j] = '\0';
@@ -77,7 +76,8 @@ char llegeixComanda(char *comanda){
         6 - DOWNLOAD
         7 - EXIT
     */
-    c = (char **)malloc(sizeof(char*));
+
+    c = (char **)malloc(sizeof(char*)*1);
     c[0] = (char *)malloc(sizeof(char));
 
     separaComanda(comanda, ' ', 0, 0);
@@ -169,8 +169,7 @@ char llegeixComanda(char *comanda){
                 opcio = 0;
             }
         }
-    }
-    else if (strcasecmp(c[0], "EXIT") == 0){
+    }else if (strcasecmp(c[0], "EXIT") == 0){
         opcio = 7;
         sizeofc = 0;
     }
@@ -272,7 +271,7 @@ Config lecturaFitxer(const char *fitxer){
 		nbytes = read(f, &cadena, 1);
 
 		i = 0;
-		config.sysports = (char **)malloc(sizeof(char) * 2);
+		config.sysports = (char **)malloc(sizeof(char*) * 2);
 
         config.sysports[0] = (char *)malloc(sizeof(char));
 		while (cadena != '\n')
