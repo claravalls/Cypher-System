@@ -1,18 +1,22 @@
 #include "network.h"
 
-Conn_cli *conn_clients; //els que s'han conectat
-Conn_serv *conn_serv; //a qui m'he connectat
-int qClients, qServ, mySock;
+Conn_cli *conn_clients;     //els que s'han conectat
+Conn_serv *conn_serv;       //a qui m'he connectat
+int qClients, qServ;        //comptador dels clients i servidors connectats
+int mySock;                 //valor del meu socket
 
-void setSockfd(int fd){ //guardo el sockfd del meu servidor
+void setSockfd(int fd){ 
     mySock = fd;
 }
 
 void afegeixClient(int newsock, char* user, char *clientName){    
+    //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió
     conn_clients = (Conn_cli*)realloc(conn_clients, sizeof(Conn_cli) * (qClients + 1));
     conn_clients[qClients].sockfd = newsock;
     conn_clients[qClients].user = clientName;
     qClients++;
+
+    //notifiquem al client que la connexió ha funcionat
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 
     //creem el thread del client
@@ -20,6 +24,7 @@ void afegeixClient(int newsock, char* user, char *clientName){
 }
 
 int connectServer(const char* ip, int port){
+    //iniciem la connexió del servidor
     int sockfd = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in s_addr;
 
@@ -36,8 +41,10 @@ int connectServer(const char* ip, int port){
 
     listen (sockfd, 3);
 
+    //creem l'array on guardarem els clients que s'han connectat
     conn_clients = (Conn_cli*) malloc (sizeof(Conn_cli));
     qClients = 0;
+    //creem l'array on guardarem els servidors als que ens hem connectat
     conn_serv = (Conn_serv*) malloc (sizeof(Conn_serv));
     qServ = 0;
 
@@ -45,7 +52,7 @@ int connectServer(const char* ip, int port){
 }
 
 int connectClient(int port, char *ip, char *myUsername){
-    char okMessage[50];
+    char* okMessage;
     char * user;
     Protocol p;
 
@@ -66,37 +73,42 @@ int connectClient(int port, char *ip, char *myUsername){
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
-        strcpy(okMessage, "");
+        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
         sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
+        free(okMessage);
         return -1;
     }
     
+    //enviem el paquet de petició de connexió
     enviaPaquet(sockc, 0x01, "[TR_NAME]", strlen(myUsername), myUsername);
 
+    //afegim una nova connexió a l'array
     conn_serv = (Conn_serv*)realloc(conn_serv, sizeof(Conn_serv) * (qServ + 1));
     conn_serv[qServ].port = port;
     conn_serv[qServ].sockfd = sockc;
 
+    //esperem a rebre el nom paquet amb el nom d'usuari del servidor
     p = llegeixPaquet(sockc);
     user = p.data;
     
     if (user != NULL){
+        //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
         conn_serv[qServ].user = user; 
-
         qServ++;
-
-        strcpy(okMessage, "");
+        //mostrem el missatge de connexió OK
+        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
         sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
+        free(okMessage);
         return 0;
     }
     return 1;
 }
 
 char * comprovaNomUsuari(char *port, int myPort){
-    int p = atoi(port);
-    char *missatge;
+    int p = atoi(port);         //variable amb el port 
+    char *missatge;             //missatge que mostrarà pel terminal
 
     missatge = (char *) malloc(sizeof(char) * (strlen(port)));
 
@@ -105,12 +117,15 @@ char * comprovaNomUsuari(char *port, int myPort){
         return NULL;
     }
     else{
-        strcpy(missatge, port);
+        //posem el missatge a mostrar com al número del port
+        strcpy(missatge, port);     
         strcat(missatge, "\n");
 
-        for (int i = 0; i < qServ; i++)
-        {
+        //recorrem l'array de connexions per veure si ja està connectada i tenim el nom d'usuari guardat
+        for (int i = 0; i < qServ; i++){     
+            //si ja està connectat, mostrarem el missatge amb el port i el nom d'usuari 
             if (conn_serv[i].port == p){
+                //sobreescriurem el missatge a mostrar
                 missatge = (char *) realloc(missatge, (sizeof(char) * 7));
                 strcpy(missatge, "");
                 sprintf(missatge, "\n%d %s\n", p, conn_serv[i].user);
@@ -123,6 +138,8 @@ char * comprovaNomUsuari(char *port, int myPort){
 
 void enviaPaquet(int fd, char type, char* header, int length, char* data){
     Protocol p;
+
+    //creem el paquet a enviar
     p.type = type;
     p.header = (char*) malloc(sizeof(char) * strlen(header));
     p.header = header;
@@ -130,6 +147,7 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     p.data = (char*) malloc(sizeof(char) * length);
     p.data = data;
 
+    //enviem el paquet camp a camp
     write(fd, &p.type, 1);
     write(fd, p.header, strlen(p.header));
     write(fd, &p.length, 2);
@@ -137,13 +155,14 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 }
 
 Protocol llegeixPaquet(int fd){
-    char type, *header, *data;
+    char type, *header, *data;      //variables on guardarem els camps del paquet
     int length = 0;
 
-    ssize_t nbytes;
+    ssize_t nbytes;                 //guardarà el número de bytes que ha llegit
     Protocol p;
 
     nbytes = read(fd, &type, 1);
+    //si no hem rebut cap missatge, retornarem un paquet amb data NULL
     if (nbytes == 0){
         p.data = NULL;
         return p;
@@ -151,10 +170,12 @@ Protocol llegeixPaquet(int fd){
 
     header = readUntil(fd, ']', ']');
 
+    //si el header indica KO, retornarem un paquet amb data NULL
     if(strcmp(header, "[CONKO]") == 0){
         p.data = NULL;
         return p;
     }
+    
     read(fd, &length, 2);
 
     data = (char *) malloc(sizeof(char) * length);
@@ -167,7 +188,7 @@ Protocol llegeixPaquet(int fd){
     return p;
 }
 
-void closeConnections(){
+void closeConnections(){                    //PROBLEMA AQUÍ. S'HAURAN DE FER SEMÀFORS 
     write(1, CLOSING, strlen(CLOSING));
     close(mySock);
     for (int i = 0; i < qServ; i++){
@@ -184,8 +205,8 @@ void closeConnections(){
 }
 
 void imprimeixMissatge(char *missatge, char* user){
-    char *aux;
-    aux = (char*) malloc(sizeof(char) * strlen(MESSAGE));
+    char *aux;          //cadena del missatge
+    aux = (char*) malloc(sizeof(char) * strlen(MESSAGE)); //SUMAR MIDA DE USER I MISSATGE
     sprintf(aux, MESSAGE, user, missatge);
     write(1, aux, strlen(aux));
     free(aux);
@@ -193,15 +214,23 @@ void imprimeixMissatge(char *missatge, char* user){
 
 void enviaMissatge(char *user, char *missatge){
     int sockfd = 0;
-    for (int i = 0; i < qServ; i++)
-    {
+    //busquem a quin sockfd correspon el nom d'usuari
+    for (int i = 0; i < qServ; i++){
         if(strcmp(conn_serv[i].user, user) == 0){
             sockfd = conn_serv[i].sockfd;
             enviaPaquet(sockfd, 0x02, "[MSG]", strlen(missatge), missatge);
             break;
         }
     }
+    //comprovem si el nom d'usuari introduit és incorrecte
     if(sockfd == 0){
         write(1, ERR_USER, strlen(ERR_USER));
+    }
+}
+
+void tancaConnexions(){
+    //avisem a tots els clients connectats que es tancarà la connexió
+    for(int i = 0; i < qServ; i++){
+        enviaPaquet(conn_serv[i].sockfd, 0x06, "[CONKO]", 0, NULL);
     }
 }

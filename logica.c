@@ -7,6 +7,9 @@ void optionExit(){
     //desconnectem sockets
     closeConnections();
 
+    //avisem als clients
+    tancaConnexions();
+
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);
 }
@@ -16,17 +19,15 @@ void optionConnect(char* port, char *ip, char *username){
     connectClient(atoi(port), ip, username);
 }
 
-
 void optionSay(char ** comanda){
     enviaMissatge(comanda[1], comanda[2]);
 }
 
 void optionShowC(char ** sysports, int myPort){
-    char * argv[4] = {"./show_connections.sh", sysports[0], sysports[1], NULL};
-    int fd[2];
-    /*int *connAvailable;
+    int fd[2];          //variable que farà de pipe
 
-	connAvailable = malloc(sizeof(int));*/
+    //creem els arguments a passar-li al procés show_connections.sh
+    char * argv[4] = {"./show_connections.sh", sysports[0], sysports[1], NULL};
 	
     write(1, TESTING, strlen(TESTING));
 
@@ -44,9 +45,7 @@ void optionShowC(char ** sysports, int myPort){
             //executem show_connections.sh
             if(execvp(argv[0], argv) < 0){
                 write(1, ERR_CONN, strlen(ERR_CONN));
-            } 
-
-            //HAIG DE TANCAR FD[1]??
+            }
             break;
         case -1:
             write(1, ERR_CONN, strlen(ERR_CONN));
@@ -64,12 +63,9 @@ void optionShowC(char ** sysports, int myPort){
 
 void optionShowA(){
 
-
 }
 
-
 void optionBroadcast(){
-
 
 }
 
@@ -77,11 +73,8 @@ void optionDownload(){
 
 }
 
-
-
 void stopAll(){
 	write(1,"\n", strlen("\n"));
     optionExit();
     kill(getpid(), SIGINT);
 }
-

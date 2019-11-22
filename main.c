@@ -8,47 +8,54 @@
 #include "network.h"
 #include "thread.h"
 
-Config config;
+Config config;      //valors del fitxer de configuració
 
 int main(int argc, const char* argv[]){
-    char opcio;
-    char* comanda;
-    int sockfd;
-    char ** valors; //valors introduits a la comanda
+    char opcio;         //valors de la opció introduida
+    char* comanda;      //cadena de la comanda entrada
+    int sockfd;         //sockfd del meu servidor
+    char ** valors;     //valors introduits a la comanda
 
     if (argc != 2){
         write(1, ERR_ARGS, strlen(ERR_ARGS));
     }
 
+    //reconfigurem la senyal SIGINT
     signal(SIGINT, stopAll);
 
+    //llegim el fitxer de configuració
     config = lecturaFitxer(argv[1]);
 
-    setConfig(config);
+    //comprovem que s'ha llegit correctament
+    if (config.user == NULL)
+    	return -1;
 
+    //iniciem la connexió del servidor
     sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
         write(1, ERR_SOCKET, strlen(ERR_SOCKET));
         return -1;
     }
 
+    //guardem el valor del nostre socket
     setSockfd(sockfd);
     config.sockfd = sockfd;
 
+    //guardem els valors llegits
+    setConfig(config);
+
+    //iniciem el thread del servidor per acceptar connexions
     iniciaThreadServidor(&config); 
-     
-    if (config.user == NULL)
-    {
-    	return -1;
-    }
 
     write(1, STARTING, strlen(STARTING));
 
     do{  
         imprimeixPrompt(config);
-        //Llegir opcio introduida
+        
+        //Llegim opcio introduida
         comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
+        //obtenim els valors introduits a la comanda
         valors = getValues();
 
         switch(opcio){
@@ -61,7 +68,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case SAY:
-                optionSay(getValues());
+                optionSay(valors);
             break;
 
             case BROADCAST:

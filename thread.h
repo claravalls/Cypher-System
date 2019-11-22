@@ -26,7 +26,23 @@ typedef struct {
     char *user;
 }Conn_cli;
 
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void iniciaThreadServidor(Config *config);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void iniciaThreadClient(Conn_cli *client);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
+void apagaServidor();
 
 #endif

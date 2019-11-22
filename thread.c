@@ -1,31 +1,25 @@
 #include "thread.h"
 
+char apaga = 1;
+
 static void *threadServ (void *config){
-    int newsock;
-    int socket;
-    char *clientName;
-    Config *c = (Config *) config;
-    Protocol p;
+    int newsock;                    //socket que vol connectar-se
+    int socket;                     //socket del meu servidor
+    char *clientName;               //nom del client que es connecta
+    Config *c = (Config *) config;  //valors del fitxer de configuració
+    Protocol p;                     //protocol de comunicació
     
-    while (1){
+    while (apaga){
         struct sockaddr_in s_addr;
         socklen_t len = sizeof (s_addr);
         socket = c->sockfd;
         newsock = accept (socket, (void *) &s_addr, &len);
         if (newsock < 0) {
             write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
-            
-            /*
-            *A QUI LI HAIG D'ENVIAR EL PAQUET??
-            p.type = 0x01;
-            p.header = (char*) malloc(sizeof(char) * 8);
-            p.header = "[CONKO]";
-            p.length = 0
-            
-            enviaPaquet(newsock, p);*/
-
             return (void *) -1;
         }
+
+        //esperem el missatge del client que s'ha connectat
         p = llegeixPaquet(newsock);
         clientName = p.data;
         if (clientName == NULL){
@@ -39,11 +33,17 @@ static void *threadServ (void *config){
     return (void *) c;
 }
 
+void apagaServidor(){
+    apaga = 0;
+}
+
 static void *threadCli (void *client){
-    Conn_cli *c = (Conn_cli *) client;
-    Protocol p;
+    Conn_cli *c = (Conn_cli *) client;      //informació del client que s'ha connectat
+    Protocol p;                             //protocol de comunicació
+    char connectat = 1;                     //variable que indica quan aturar el thread
     
-    while (1){
+    while (connectat){
+        //escoltem si el client ens envia un missatge
         p = llegeixPaquet(c->sockfd);
         switch(p.type){
             case 0x02:
@@ -63,6 +63,11 @@ static void *threadCli (void *client){
                 break;
 
             case 0x06:
+                //tancar la connexio
+                p = llegeixPaquet(c->sockfd);
+
+                //connectat = 0;
+                //close(c->sockfd);
                 break;
         }
     }

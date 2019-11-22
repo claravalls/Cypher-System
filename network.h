@@ -32,15 +32,71 @@ typedef struct{
     char * data;
 }Protocol;
 
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 int connectServer(const char *ip, int port);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 int connectClient(int port, char *ip, char *username);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void afegeixClient(int newsock, char * user, char *clientName);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void setSockfd(int fd);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void closeConnections();
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 char * comprovaNomUsuari(char *port, int myPort);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void enviaPaquet(int fd, char type, char *header, int length, char *data);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 Protocol llegeixPaquet(int fd);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void imprimeixMissatge(char *missatge, char* user);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void enviaMissatge(char *user, char *missatge);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
+void tancaConnexions();
 
 #endif

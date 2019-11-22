@@ -38,13 +38,60 @@ typedef struct{
     int sockfd;
 }Config;
 
+/***********************************************
+* @Finalitat:   Finalitzar el procés assegurant-se que totes les connexions 
+                es tanquen i alliberant tota la memòria demanada
+* @Parametres:  ---
+* @Retorn:      ---
+************************************************/
 void optionExit();
+/***********************************************
+* @Finalitat:   Implementar la connexió del client a un servidor
+* @Parametres:  port: cadena que conté el port al qual connectar-se
+                ip: direcció IP on ens volem connectar
+                username: nom del meu usuari
+* @Retorn:      ---
+************************************************/
 void optionConnect(char* port, char *ip, char *username);
+/***********************************************
+* @Finalitat:   
+* @Parametres:
+* @Retorn:
+************************************************/
 void optionDownload();
+/***********************************************
+* @Finalitat:   Enviar un missatge a un usuari
+* @Parametres:  comanda: array de cadenes que contenen les paraules de la 
+                comanda introduïda
+* @Retorn:      ---
+************************************************/
 void optionSay(char ** comanda);
+/***********************************************
+* @Finalitat:   mostrar els ports les connexions disponibles
+* @Parametres:  sysports: array de dues caselles que contenen el primer i 
+                l'últim rang a escanejar
+                myPort: valor del port del propi servidor
+* @Retorn:      ---
+************************************************/
 void optionShowC(char ** sysports, int myPort);
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void optionShowA();
+/***********************************************
+* @Finalitat:
+* @Parametres:
+* @Retorn:
+************************************************/
 void optionBroadcast();
+/***********************************************
+* @Finalitat:   Funció executada al rebre un Ctrl+C. S'assegura de tancar les
+                connexions obertes i alliberar la memòria demanada.
+* @Parametres:  ---
+* @Retorn:      ---
+************************************************/
 void stopAll();
 
 #endif

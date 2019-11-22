@@ -1,23 +1,24 @@
 #include "manager.h"
 
 
-char ** c;
-char sizeofc;
-Config config;
+char ** c;              //comanda entrada
+char sizeofc;           //quantitat de paraules de la comanda
+Config config;          //valors del fitxer de configuració
 
 void setConfig(Config c){
     config = c;
 }
 void imprimeixPrompt(){
-    char *aux;
+    char *aux;          //variable que contindrà el prompt
     aux = (char*) malloc(sizeof(char) * strlen(PROMPT));
     sprintf(aux, PROMPT, config.user);
     write(1, aux, strlen(aux));
     free(aux);
 }
 char* readUntil(int fd, char end, char lastChar) {
-    int i = 0;
-    char c = '\0';
+    int i;       //variable que recorre la cadena
+    char c;     //caràcter que llegim
+
     char* string = (char*)malloc(sizeof(char));
 
     while (c != end) {
@@ -29,6 +30,7 @@ char* readUntil(int fd, char end, char lastChar) {
         i++;
     }
 
+    //posem com a últim caràcter el valor introduit
 	string[i - 1] = lastChar;
     return string;
 }
@@ -42,18 +44,20 @@ char* readUntil(int fd, char end, char lastChar) {
 void separaComanda(char *comanda, char limit, int i, int casella){
     int j = 0;
 
-    if(comanda[i] == ' '){ //em salto l'espai entre paraules
+    //em salto l'espai entre paraules
+    if(comanda[i] == ' '){ 
         i++;
     }
 
+    //mirem que la comanda no estigui buida
     if(comanda[i] == '\n'){
         write(1, ERR_ARGS, strlen(ERR_ARGS));
         c[casella][0] = '\0';
     }
     else{
+        //llegim fins al límit
         while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
             c[casella][j] = comanda[i];
-
             i++;
             j++;
             c[casella] = (char *)realloc(c[casella], sizeof(char) * (j+1));
@@ -61,6 +65,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
 
         c[casella][j] = '\0';
 
+        //si la paraula és SHOW, la comanda introduida tindrà espais. Seguim llegint
         if (strcasecmp(c[casella], "SHOW") == 0){
             c[casella][j] = ' ';
             i++;
@@ -92,6 +97,7 @@ char llegeixComanda(char *comanda){
     c = (char **)malloc(sizeof(char*)*1);
     c[0] = (char *)malloc(sizeof(char));
 
+    //guardem a la variable c[0] la paraula de la comanda
     separaComanda(comanda, ' ', 0, 0);
 
     if (strcasecmp(c[0], "SHOW CONNECTIONS") == 0){
@@ -104,7 +110,9 @@ char llegeixComanda(char *comanda){
         c = (char **)realloc(c, sizeof(char*) * 2);
         
         c[1] = (char *)malloc(sizeof(char));
+        //llegim a la variable c[1] el nom de l'usuari
         separaComanda(comanda, ' ', strlen("SHOW AUDIOS"), 1);
+
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
             opcio = 0;
@@ -116,6 +124,7 @@ char llegeixComanda(char *comanda){
         sizeofc = 1;
         c = (char **)realloc(c, sizeof(char*) * 2);
 
+        //llegim a la variable c[1] el número del port
         c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("CONNECT"), 1);
 
@@ -130,17 +139,20 @@ char llegeixComanda(char *comanda){
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
 
+        //llegim a la variable c[1] el nom de l'usuari
         c[1] = (char *)malloc(sizeof(char));
         separaComanda(comanda, ' ', strlen("SAY"), 1);
+
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
             opcio = 0;
         }
         else{
-            //text
             c = (char **)realloc(c, sizeof(char*) * 3);
             c[2] = (char *)malloc(sizeof(char));
+            //llegim a la variable c[1] el text a enviar
             separaComanda(comanda, '\n', strlen("SAY") + strlen(c[1]) + 1, 2);
+
             //ens assegurem que hi hagi els arguments necessaris
             if(c[2][0] == '\0'){
                 opcio = 0;
@@ -153,6 +165,7 @@ char llegeixComanda(char *comanda){
         c = (char **)realloc(c, sizeof(char*) * 2);
 
         c[1] = (char *)malloc(sizeof(char));
+        //llegim a la variable c[1] el missatge a enviar
         separaComanda(comanda, '\n', strlen("BROADCAST"), 1);
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
@@ -166,7 +179,9 @@ char llegeixComanda(char *comanda){
         c = (char **)realloc(c, sizeof(char*) * 2);
 
         c[1] = (char *)malloc(sizeof(char));
+        //llegim a la variable c[1] el nom de l'usuari
         separaComanda(comanda, ' ', strlen("DOWNLOAD"), 1);
+
         //ens assegurem que hi hagi els arguments necessaris
         if(c[1][0] == '\0'){
             opcio = 0;
@@ -175,7 +190,9 @@ char llegeixComanda(char *comanda){
             //audio
             c = (char **)realloc(c, sizeof(char*) * 3);
             c[2] = (char *)malloc(sizeof(char));
+            //llegim a la variable c[1] el nom de l'audio
             separaComanda(comanda, '\n', strlen("DOWNLOAD") + strlen(c[1]) + 1, 2);
+
             //ens assegurem que hi hagi els arguments necessaris
             if(c[2][0] == '\0'){
                 opcio = 0;
@@ -190,13 +207,14 @@ char llegeixComanda(char *comanda){
 }
 
 Config lecturaFitxer(const char *fitxer){
-	ssize_t nbytes;
-	unsigned char cadena;
-	int i = 0, f;
-    char * aux;
-    Config config;
+	ssize_t nbytes;         //número de bytes llegits
+	unsigned char cadena;   //caràcter que llegim
+	int i = 0;              //variable que anirà recorrent la cadena
+    int f;                  //file descriptor del fitxer    
+    char * aux;             //cadena auxiliar per llegir valors enters
+    Config config;          //valors del fitxer de configuració a retornar
 
-	//Lectura fitxer
+	//obrim el fitxer
     f = open(fitxer, O_RDONLY);
     if (f < 0)
     {
@@ -262,6 +280,7 @@ Config lecturaFitxer(const char *fitxer){
 		}
 		aux[i] = '\0';
 
+        //convertim el valor a enter
 		config.port = atoi(aux);
         free(aux);
 
@@ -345,11 +364,14 @@ char ** getValues(){
 }
 
 void buscaPorts(int pipe, int myPort){
-    ssize_t nbytes;
-	unsigned char c;
-    char *port, *extra, *missatge, *aux;
-    char **connexions;
-    int nConn = 0;
+    ssize_t nbytes;                         //número de bytes llegit
+	unsigned char c;                        //caràcter que guardarà el que llegim del pipe                     
+    char *port;                             //número del port en cadena
+    char *extra;                            //caràcters que no necessito del que m'envien
+    char *missatge;                         //línia que es mostrarà amb el número i l'usuari, si el sé
+    char *aux;                              //cadena del missatge a msotrar
+    char **connexions;                      //variable que guardarà tots els ports que estan oberts
+    int nConn = 0;                          //número de connexions disponibles
 
     connexions = (char **) malloc(sizeof(char*));
     nbytes = read(pipe, &c, 1);
@@ -364,29 +386,31 @@ void buscaPorts(int pipe, int myPort){
         //comprovo si se el nom de l'usuari
         missatge = comprovaNomUsuari(port, myPort);
 
-        if(missatge != NULL){ //comprovem que no es mostri el nostre port
+        //comprovem que no es mostri el nostre port
+        if(missatge != NULL){ 
+            //redimensionem per afegir una nova connexió
             connexions = (char **) realloc(connexions, sizeof(char *) * (nConn + 1));
             connexions[nConn] = missatge;
             nConn++;
         } 
+
         //llegeixo el que queda
         extra = readUntil(pipe, '\n', '\n');
         free(extra);
 
         nbytes = read(pipe, &c, 1);
-
     }
-
+    
+    //mostrem el missatge de la quantitat de connexions disponibles
     aux = (char *) malloc(sizeof(char) * strlen(CONN_AVAIL));
     sprintf(aux, CONN_AVAIL, nConn);
     write(1, aux, strlen(aux));
     free(aux);
 
-    for (int i = 0; i < nConn; i++)
-    {
+    //mostrem les connexions disponibles
+    for (int i = 0; i < nConn; i++){
         write(1, connexions[i], strlen(connexions[i]));
         free(connexions[i]);
     }
-
     free(connexions);
 }
