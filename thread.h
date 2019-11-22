@@ -27,21 +27,23 @@ typedef struct {
 }Conn_cli;
 
 /***********************************************
-* @Finalitat:
-* @Parametres:
-* @Retorn:
+* @Finalitat:   crear un thread que mantindrà al servidor a 
+                l'espera de noves connexions
+* @Parametres:  config: informació extreta del fitxer de configuració
+* @Retorn:      ---
 ************************************************/
 void iniciaThreadServidor(Config *config);
 /***********************************************
-* @Finalitat:
-* @Parametres:
-* @Retorn:
+* @Finalitat:   crear un thread que estarà escoltant constantment
+                al client per si envia algun missatge
+* @Parametres:  clients: informació del client a qui està escoltant
+* @Retorn:      ---
 ************************************************/
 void iniciaThreadClient(Conn_cli *client);
 /***********************************************
-* @Finalitat:
-* @Parametres:
-* @Retorn:
+* @Finalitat:   aturar el thread del servidor que espera noves connexions
+* @Parametres:  ---
+* @Retorn:      ---
 ************************************************/
 void apagaServidor();
 

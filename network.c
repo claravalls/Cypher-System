@@ -103,7 +103,7 @@ int connectClient(int port, char *ip, char *myUsername){
         free(okMessage);
         return 0;
     }
-    return 1;
+    return -1;
 }
 
 char * comprovaNomUsuari(char *port, int myPort){
