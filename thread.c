@@ -63,11 +63,14 @@ static void *threadCli (void *client){
                 break;
 
             case 0x06:
-                //tancar la connexio
-                p = llegeixPaquet(c->sockfd);
+                //enviar el paquet de desconnexió OK
+                enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, NULL);
+                connectat = 0;
+                //VIGLIAR AMB SEMÀFORS??
+                close(c->sockfd);
 
-                //connectat = 0;
-                //close(c->sockfd);
+                //S'ha de modificar l'array de conn_serv i restar una qServ;
+                eliminarConnexio(c); //HA DE FER SHIFT DELS VALORS A L'ESQUERRA
                 break;
         }
     }

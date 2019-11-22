@@ -188,17 +188,15 @@ Protocol llegeixPaquet(int fd){
     return p;
 }
 
-void closeConnections(){                    //PROBLEMA AQUÍ. S'HAURAN DE FER SEMÀFORS 
+void freeConnections(){                    
     write(1, CLOSING, strlen(CLOSING));
     close(mySock);
     for (int i = 0; i < qServ; i++){
-        close(conn_serv[i].sockfd);
         free(conn_serv[i].user);
     }
     free(conn_serv);
     
     for (int i = 0; i < qClients; i++){
-        close(conn_clients[i].sockfd);
         free(conn_clients[i].user);
     }
     free(conn_clients);
@@ -229,8 +227,20 @@ void enviaMissatge(char *user, char *missatge){
 }
 
 void tancaConnexions(){
+    Protocol p;
+    int i = 0;
+    //agafem el nom de l'usuari
+    Config config = getConfig();
     //avisem a tots els clients connectats que es tancarà la connexió
-    for(int i = 0; i < qServ; i++){
-        enviaPaquet(conn_serv[i].sockfd, 0x06, "[CONKO]", 0, NULL);
+    while(i < qServ) {
+        enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
+        p = llegeixPaquet(conn_serv[i].sockfd);
+
+        //comprovem que ha rebut el missatge. Sino, el tornarem a enviar
+        if(strcmp(p.header, "[CONOK]")){
+            //VIGILAR AMB SEMÀFORS
+            close(conn_serv[i].sockfd);
+            i++;
+        }
     }
 }

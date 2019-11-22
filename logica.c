@@ -3,12 +3,15 @@
 
 void optionExit(){
     write(1,DISCONNECT, strlen(DISCONNECT));
-    
-    //desconnectem sockets
-    closeConnections();
 
     //avisem als clients
     tancaConnexions();
+
+    //alliberem la memòria de les connexions
+    freeConnections();
+
+    //deixem d'escoltar connexions
+    apagaServidor();
 
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);

@@ -24,6 +24,12 @@
 ************************************************/
 void setConfig(Config c);
 /***********************************************
+* @Finalitat:   retornar el valor de la configuració llegida al fitxer
+* @Parametres:  ---
+* @Retorn:      retorna la informació llegida del fitxer
+************************************************/
+Config getConfig();
+/***********************************************
 * @Finalitat:   mostrar el prompt amb el nom de l'usuari pel terminal
 * @Parametres:  ---
 * @Retorn:      ---

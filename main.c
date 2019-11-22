@@ -84,7 +84,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case EXIT:
-                optionExit(sockfd);
+                optionExit(config.user);
             break;
 
             default:

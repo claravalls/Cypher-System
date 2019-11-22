@@ -8,6 +8,11 @@ Config config;          //valors del fitxer de configuració
 void setConfig(Config c){
     config = c;
 }
+
+Config getConfig(){
+    return config;
+}
+
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
     aux = (char*) malloc(sizeof(char) * strlen(PROMPT));
