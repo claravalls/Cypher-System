@@ -63,11 +63,11 @@ void afegeixClient(int newsock, char * user, char *clientName);
 ************************************************/
 void setSockfd(int fd);
 /***********************************************
-* @Finalitat:   Tancar totes les connexions establertes
+* @Finalitat:   Elimina la memòria demanada per guardar les connexions
 * @Parametres:  ---
 * @Retorn:      ---
 ************************************************/
-void closeConnections();
+void freeConnections();
 /***********************************************
 * @Finalitat:   Comprovar si se sap el nom de l'usuari que correspon al 
                 port introduit, és a dir, si ja hi ha una connexió establerta
@@ -110,6 +110,22 @@ void imprimeixMissatge(char *missatge, char* user);
 ************************************************/
 void enviaMissatge(char *user, char *missatge);
 /***********************************************
+* @Finalitat:   eliminar el valor de l'array de connexions i shiftar els
+                valors a l'esquerra
+* @Parametres:  sockfd: file descriptor del socket a tancar
+                user: nom de l'usuari que es tanca
+* @Retorn:      ---
+************************************************/
+void eliminaConnexioCli(int sockfd, char *user);
+/***********************************************
+* @Finalitat:   eliminar el valor de l'array de connexions i shiftar els
+                valors a l'esquerra
+* @Parametres:  sockfd: file descriptor del socket a tancar
+                user: nom de l'usuari que es tanca
+* @Retorn:      ---
+************************************************/
+void eliminaConnexioServ(int sockfd, char *user);
+/***********************************************
 * @Finalitat:   enviar un paquet a totes les connexions establertes per 
                 notificar que el servidor s'apaga i s'han de tancar les
                 connexions
@@ -117,5 +133,9 @@ void enviaMissatge(char *user, char *missatge);
 * @Retorn:      ---
 ************************************************/
 void tancaConnexions();
+
+/*int initSemaphore();
+
+semaphore* getSemaphoreDes();*/
 
 #endif

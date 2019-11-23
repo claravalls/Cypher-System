@@ -32,11 +32,18 @@ typedef struct {
 * @Parametres:  config: informació extreta del fitxer de configuració
 * @Retorn:      ---
 ************************************************/
-void iniciaThreadServidor(Config *config);
+void iniciaThreadEscolta(Config* config);
+/***********************************************
+* @Finalitat:   crear un thread que estarà escoltant constantment
+                al servidor a qui s'ha connectat per si envia algun missatge
+* @Parametres:  servidor: informació del servidor a qui està escoltant
+* @Retorn:      ---
+************************************************/
+void iniciaThreadServidor(Conn_serv *servidor);
 /***********************************************
 * @Finalitat:   crear un thread que estarà escoltant constantment
                 al client per si envia algun missatge
-* @Parametres:  clients: informació del client a qui està escoltant
+* @Parametres:  client: informació del client a qui està escoltant
 * @Retorn:      ---
 ************************************************/
 void iniciaThreadClient(Conn_cli *client);

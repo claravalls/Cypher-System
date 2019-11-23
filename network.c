@@ -5,9 +5,24 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
+//semaphore* sDesconnexio;
+
 void setSockfd(int fd){ 
     mySock = fd;
 }
+
+/*int initSemaphore(){
+    sDesconnexio = (semaphore *) malloc(sizeof(semaphore));
+    int fail = SEM_constructor_with_name (sDesconnexio, ftok("network.c", 1234));
+    if(!fail){
+        SEM_init(sDesconnexio, 0);
+    }
+    return fail;
+}
+
+semaphore* getSemaphoreDes(){
+    return sDesconnexio;
+}*/
 
 void afegeixClient(int newsock, char* user, char *clientName){    
     //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió
@@ -21,6 +36,7 @@ void afegeixClient(int newsock, char* user, char *clientName){
 
     //creem el thread del client
     iniciaThreadClient(&conn_clients[qClients - 1]);
+    printf("Tenim %d clients connectats\n", qClients);
 }
 
 int connectServer(const char* ip, int port){
@@ -95,7 +111,10 @@ int connectClient(int port, char *ip, char *myUsername){
     if (user != NULL){
         //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
         conn_serv[qServ].user = user; 
+
+        iniciaThreadServidor(&conn_serv[qServ]);
         qServ++;
+
         //mostrem el missatge de connexió OK
         okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
         sprintf (okMessage, OK_CONN, port, user);
@@ -109,7 +128,6 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-
     missatge = (char *) malloc(sizeof(char) * (strlen(port)));
 
     //si és el meu servidor no el vull mostrar
@@ -144,7 +162,13 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     p.header = (char*) malloc(sizeof(char) * strlen(header));
     p.header = header;
     p.length = length;
-    p.data = (char*) malloc(sizeof(char) * length);
+
+    if(length !=  0){
+        p.data = (char*) malloc(sizeof(char) * length);
+    }
+    else{
+        p.data = (char*) malloc(sizeof(char));
+    }
     p.data = data;
 
     //enviem el paquet camp a camp
@@ -190,7 +214,6 @@ Protocol llegeixPaquet(int fd){
 
 void freeConnections(){                    
     write(1, CLOSING, strlen(CLOSING));
-    close(mySock);
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
@@ -200,6 +223,8 @@ void freeConnections(){
         free(conn_clients[i].user);
     }
     free(conn_clients);
+
+    close(mySock);
 }
 
 void imprimeixMissatge(char *missatge, char* user){
@@ -232,15 +257,83 @@ void tancaConnexions(){
     //agafem el nom de l'usuari
     Config config = getConfig();
     //avisem a tots els clients connectats que es tancarà la connexió
-    while(i < qServ) {
-        enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-        p = llegeixPaquet(conn_serv[i].sockfd);
+    while(i < qClients) {
+        enviaPaquet(conn_clients[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
+        printf("Enviem el paquet de desconnexio al client %s\n", conn_clients[i].user);
+
+        /*p = llegeixPaquet(conn_clients[i].sockfd);
+
+        printf("Llegim el paquet amb header %s\n", p.header);
 
         //comprovem que ha rebut el missatge. Sino, el tornarem a enviar
-        if(strcmp(p.header, "[CONOK]")){
+        if(strcmp(p.header, "[CONKO]") != 0){
+            printf("L'usuari %s ha rebut el missatge\n", conn_clients[i].user);
+            //VIGILAR AMB SEMÀFORS
+            close(conn_clients[i].sockfd);
+            i++;
+        }*/
+        i++;
+    }
+
+    //avisem a tots els servidors que es tancarà la connexió
+    while(i < qServ) {
+        enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
+        printf("Enviem el paquet de desconnexio al servidor %s\n", conn_serv[i].user);
+
+        p = llegeixPaquet(conn_serv[i].sockfd);
+
+        printf("Llegim el paquet amb header %s\n", p.header);
+
+        //comprovem que ha rebut el missatge. Sino, el tornarem a enviar
+        if(strcmp(p.header, "[CONKO]") != 0){
+            printf("L'usuari %s ha rebut el missatge\n", conn_serv[i].user);
             //VIGILAR AMB SEMÀFORS
             close(conn_serv[i].sockfd);
             i++;
         }
     }
+}
+
+void eliminaConnexioCli(int sockfd, char *user){
+    int s = 0, b;
+    //busquem al client a l'array
+    for (b = 0; b < qClients; b++){
+        if(conn_clients[b].sockfd == sockfd){
+            s = b + 1;
+            //shiftem els valors a l'esquerra
+            for (int i = b; i < qClients; i++){
+                conn_clients[b] = conn_clients[s];
+                b++;
+                s++;
+            }
+
+            //redimensionem la mida de l'array
+            conn_clients = (Conn_cli *) realloc(conn_clients, sizeof(Conn_cli) * (qClients - 1));
+            qClients--;
+            break;
+        }
+    }
+    printf("Connexió amb %s tancada\n", user);
+}
+
+void eliminaConnexioServ(int sockfd, char *user){
+    int s = 0, b;
+    //busquem al client a l'array
+    for (b = 0; b < qServ; b++){
+        if(conn_serv[b].sockfd == sockfd){
+            s = b + 1;
+            //shiftem els valors a l'esquerra
+            for (int i = b; i < qServ; i++){
+                conn_serv[b] = conn_serv[s];
+                b++;
+                s++;
+            }
+
+            //redimensionem la mida de l'array
+            conn_serv = (Conn_serv *) realloc(conn_serv, sizeof(Conn_serv) * (qServ - 1));
+            qServ--;
+            break;
+        }
+    }
+    printf("Connexió amb %s tancada\n", user);
 }

@@ -21,8 +21,8 @@ void imprimeixPrompt(){
     free(aux);
 }
 char* readUntil(int fd, char end, char lastChar) {
-    int i;       //variable que recorre la cadena
-    char c;     //caràcter que llegim
+    int i = 0;       //variable que recorre la cadena
+    char c = '\0';     //caràcter que llegim
 
     char* string = (char*)malloc(sizeof(char));
 
@@ -380,11 +380,12 @@ void buscaPorts(int pipe, int myPort){
 
     connexions = (char **) malloc(sizeof(char*));
     nbytes = read(pipe, &c, 1);
+
     while (nbytes > 0){
         //llegeixo "port"
-        extra = readUntil(pipe, ' ', '\n');
+        extra = readUntil(pipe, ' ', '\0');
         free(extra);
-
+        
         //llegeixo el numero del port
         port = readUntil(pipe, ' ', '\0');
 

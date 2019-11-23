@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]){
     setConfig(config);
 
     //iniciem el thread del servidor per acceptar connexions
-    iniciaThreadServidor(&config); 
+    iniciaThreadEscolta(&config); 
 
     write(1, STARTING, strlen(STARTING));
 

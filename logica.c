@@ -54,9 +54,9 @@ void optionShowC(char ** sysports, int myPort){
             write(1, ERR_CONN, strlen(ERR_CONN));
             break;
         default:
+            close(fd[1]);
             //esperem que acabi d'escriure
             wait(NULL);
-            close(fd[1]);
             //llegim del pipe i busquem els ports
             buscaPorts(fd[0], myPort);
             close(fd[0]);
