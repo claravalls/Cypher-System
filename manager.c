@@ -61,7 +61,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
     }
     else{
         //llegim fins al límit
-        while(comanda[i] != limit && comanda[i] != '\n' && j < 20){
+        while(comanda[i] != limit && comanda[i] != '\n'){
             c[casella][j] = comanda[i];
             i++;
             j++;
@@ -75,7 +75,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
             c[casella][j] = ' ';
             i++;
             j++;
-            while(comanda[i] != ' ' && comanda[i] != '\n'&& j < 20){
+            while(comanda[i] != ' ' && comanda[i] != '\n'){
                 c[casella][j] = comanda[i];
                 i++;
                 j++;
@@ -155,7 +155,7 @@ char llegeixComanda(char *comanda){
         else{
             c = (char **)realloc(c, sizeof(char*) * 3);
             c[2] = (char *)malloc(sizeof(char));
-            //llegim a la variable c[1] el text a enviar
+            //llegim a la variable c[2] el text a enviar
             separaComanda(comanda, '\n', strlen("SAY") + strlen(c[1]) + 1, 2);
 
             //ens assegurem que hi hagi els arguments necessaris

@@ -229,7 +229,7 @@ void freeConnections(){
 
 void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
-    aux = (char*) malloc(sizeof(char) * strlen(MESSAGE)); //SUMAR MIDA DE USER I MISSATGE
+    aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user))); //SUMAR MIDA DE USER I MISSATGE
     sprintf(aux, MESSAGE, user, missatge);
     write(1, aux, strlen(aux));
     free(aux);
