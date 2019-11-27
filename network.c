@@ -316,7 +316,7 @@ void eliminaConnexioCli(char *user){
     printf("Connexió amb %s tancada\n", user);
 }
 
-void eliminaConnexioServ(int sockfd, char *user){
+void eliminaConnexioServ(char *user){
     int s = 0, b;
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
