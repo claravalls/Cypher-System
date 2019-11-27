@@ -14,7 +14,7 @@
 
 #include "network.h"
 #include "logica.h"
-
+ 
 typedef struct {
     int port;
     int sockfd;

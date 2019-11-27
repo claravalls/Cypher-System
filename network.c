@@ -294,11 +294,11 @@ void tancaConnexions(){
     }
 }
 
-void eliminaConnexioCli(int sockfd, char *user){
+void eliminaConnexioCli(char *user){
     int s = 0, b;
     //busquem al client a l'array
     for (b = 0; b < qClients; b++){
-        if(conn_clients[b].sockfd == sockfd){
+        if(strcmp(user, conn_clients[b].user) == 0){
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qClients; i++){
@@ -320,7 +320,7 @@ void eliminaConnexioServ(int sockfd, char *user){
     int s = 0, b;
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
-        if(conn_serv[b].sockfd == sockfd){
+        if(strcmp(user, conn_serv[b].user) == 0){
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qServ; i++){

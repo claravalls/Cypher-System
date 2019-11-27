@@ -112,19 +112,17 @@ void enviaMissatge(char *user, char *missatge);
 /***********************************************
 * @Finalitat:   eliminar el valor de l'array de connexions i shiftar els
                 valors a l'esquerra
-* @Parametres:  sockfd: file descriptor del socket a tancar
-                user: nom de l'usuari que es tanca
+* @Parametres:  user: nom de l'usuari que es tanca
 * @Retorn:      ---
 ************************************************/
-void eliminaConnexioCli(int sockfd, char *user);
+void eliminaConnexioCli(char *user);
 /***********************************************
 * @Finalitat:   eliminar el valor de l'array de connexions i shiftar els
                 valors a l'esquerra
-* @Parametres:  sockfd: file descriptor del socket a tancar
-                user: nom de l'usuari que es tanca
+* @Parametres:  user: nom de l'usuari que es tanca
 * @Retorn:      ---
 ************************************************/
-void eliminaConnexioServ(int sockfd, char *user);
+void eliminaConnexioServ(char *user);
 /***********************************************
 * @Finalitat:   enviar un paquet a totes les connexions establertes per 
                 notificar que el servidor s'apaga i s'han de tancar les

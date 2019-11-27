@@ -1,6 +1,10 @@
 #include "thread.h"
 
+int qClients = 0, qServidors = 0;
 char apaga = 1;
+pthread_t * tServidor, *tClient;
+pthread_mutex_t mtxC = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
 
 static void *threadEscolta (void *config){
     int newsock;                    //socket que vol connectar-se
@@ -59,6 +63,7 @@ static void *threadServ (void *servidor){
                 break;
 
             case 0x06:
+            printf("id C: %d\n", c->sockfd);
                 if(strcmp(p.header, "[]") == 0){
                     printf("rebem el paquet amb header %s del servidor %s\n", p.header, c->user);
                     //enviar el paquet de desconnexió OK
@@ -66,22 +71,21 @@ static void *threadServ (void *servidor){
                     enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, "");
 
                     printf("Paquet de desconnexio enviat al sock %d\n", c->sockfd);
-                    
-                    //vigilar amb semàfors de no tancar abans que ho llegeixi
-                    //close(c->sockfd);
 
                     //S'ha de modificar l'array de conn_serv i restar una qServ;
-                    eliminaConnexioServ(c->sockfd, c->user);
-                }
-                else if(strcmp(p.header, "[CONOK]") == 0){
-                    printf("L'usuari %s ha rebut el missatge\n", c->user);
-                    //VIGILAR AMB SEMÀFORS
+                    pthread_mutex_lock(&mtxS);
+                    eliminaConnexioServ(c->user);
+                    pthread_mutex_unlock(&mtxS);
+
                     connectat = 0;
-                    close(c->sockfd);
                 }
+                //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
         }
     }
+
+    pthread_mutex_destroy(&mtxS);
+
     return (void *) c;
 }
 
@@ -89,7 +93,8 @@ static void *threadCli (void *client){
     Conn_cli *c = (Conn_cli *) client;      //informació del client que s'ha connectat
     Protocol p;                             //protocol de comunicació
     char connectat = 1;                     //variable que indica quan aturar el thread
-    
+    printf("id A: %d\n", c->sockfd);
+
     while (connectat){
         //escoltem si el client ens envia un missatge
         p = llegeixPaquet(c->sockfd);
@@ -111,10 +116,13 @@ static void *threadCli (void *client){
                 break;
 
             case 0x06:
+            printf("id C: %d\n", c->sockfd);
                 if(strcmp(p.header, "[]") == 0){
                     printf("rebem el paquet amb header %s del client %s\n", p.header, c->user);
                     //enviar el paquet de desconnexió OK
                     printf("L'usuari %s es vol desconnectar\n", c->user);
+                                printf("id D: %d\n", c->sockfd);
+
                     enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, "");
 
                     printf("Paquet de desconnexio enviat al sock %d\n", c->sockfd);
@@ -122,31 +130,41 @@ static void *threadCli (void *client){
                     //close(c->sockfd);
 
                     //S'ha de modificar l'array de conn_serv i restar una qServ;
-                    eliminaConnexioCli(c->sockfd, c->user);
+                    pthread_mutex_lock(&mtxC);
+                    eliminaConnexioCli(c->user);
+                    //close(c->sockfd);
+                    pthread_mutex_unlock(&mtxC);
                 }
                 else if(strcmp(p.header, "[CONOK]") == 0){
                     printf("L'usuari %s ha rebut el missatge\n", c->user);
                     //VIGILAR AMB SEMÀFORS
                     connectat = 0;
-                    close(c->sockfd);
+                    //close(c->sockfd);
                 }
                 break;
         }
     }
+
+    pthread_mutex_destroy(&mtxC);
     return (void *) c;
 }
 
 void iniciaThreadServidor(Conn_serv* servidor){
-    pthread_t t1;
-    pthread_create(&t1, NULL, threadServ, servidor);
+    tServidor = (pthread_t *)realloc(tServidor, sizeof(pthread_t) * (qServidors + 1));
+    pthread_create(&(tServidor[qServidors]), NULL, threadServ, servidor);
+    qServidors++;
 }
 
 void iniciaThreadClient(Conn_cli* client){
-    pthread_t t1;
-    pthread_create(&t1, NULL, threadCli, client);
+    tClient = (pthread_t *)realloc(tClient, sizeof(pthread_t) * (qClients + 1));
+    pthread_create(&(tClient[qClients]), NULL, threadCli, client);
+    qClients++;
 }
 
 void iniciaThreadEscolta(Config* config){
     pthread_t t1;
     pthread_create(&t1, NULL, threadEscolta, config);
+
+    tServidor = (pthread_t *) malloc(sizeof(pthread_t));
+    tClient = (pthread_t *) malloc(sizeof(pthread_t));
 }
