@@ -37,6 +37,13 @@ char* readUntil(int fd, char end, char lastChar) {
 
     //posem com a últim caràcter el valor introduit
 	string[i - 1] = lastChar;
+
+    //Si l'últim caràcter no és \0 pot donar problemes al utilitzar funcions de cadenes
+    if(lastChar != '\0'){
+        i++;
+        string = (char*)realloc(string, sizeof(char) * (i + 2));
+        string[i - 1] = '\0';
+    }
     return string;
 }
 
