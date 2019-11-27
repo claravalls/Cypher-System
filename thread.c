@@ -1,8 +1,6 @@
 #include "thread.h"
 
-int qClients = 0, qServidors = 0;
 char apaga = 1;
-pthread_t * tServidor, *tClient;
 pthread_mutex_t mtxC = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
 
@@ -47,6 +45,7 @@ static void *threadServ (void *servidor){
     char connectat = 1;                     //variable que indica quan aturar el thread
     
     while (connectat){
+        printf("id B: %d\n", c->sockfd);
         //escoltem si el servidor ens envia un missatge
         p = llegeixPaquet(c->sockfd);
         switch(p.type){
@@ -97,6 +96,8 @@ static void *threadCli (void *client){
 
     while (connectat){
         //escoltem si el client ens envia un missatge
+        printf("id B: %d\n", c->sockfd);
+
         p = llegeixPaquet(c->sockfd);
         switch(p.type){
             case 0x02:
@@ -150,21 +151,16 @@ static void *threadCli (void *client){
 }
 
 void iniciaThreadServidor(Conn_serv* servidor){
-    tServidor = (pthread_t *)realloc(tServidor, sizeof(pthread_t) * (qServidors + 1));
-    pthread_create(&(tServidor[qServidors]), NULL, threadServ, servidor);
-    qServidors++;
+    pthread_t t1;
+    pthread_create(&t1, NULL, threadServ, servidor);
 }
 
 void iniciaThreadClient(Conn_cli* client){
-    tClient = (pthread_t *)realloc(tClient, sizeof(pthread_t) * (qClients + 1));
-    pthread_create(&(tClient[qClients]), NULL, threadCli, client);
-    qClients++;
+    pthread_t t1;
+    pthread_create(&t1, NULL, threadCli, client);
 }
 
 void iniciaThreadEscolta(Config* config){
     pthread_t t1;
     pthread_create(&t1, NULL, threadEscolta, config);
-
-    tServidor = (pthread_t *) malloc(sizeof(pthread_t));
-    tClient = (pthread_t *) malloc(sizeof(pthread_t));
 }
