@@ -4,6 +4,11 @@ char apaga = 1;
 pthread_mutex_t mtxC = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
 
+UserThread *tServ;
+UserThread *tCli;
+int qServ;
+int qCli;
+
 static void *threadEscolta (void *config){
     int newsock;                    //socket que vol connectar-se
     int socket;                     //socket del meu servidor
@@ -40,12 +45,19 @@ void apagaServidor(){
 }
 
 static void *threadServ (void *servidor){
-    Conn_serv *c = (Conn_serv *) servidor;   //informació del client que s'ha connectat
+    Conn_serv *aux = (Conn_serv *) servidor;   //informació del client que s'ha connectat
+    Conn_serv *c;
     Protocol p;                             //protocol de comunicació
     char connectat = 1;                     //variable que indica quan aturar el thread
     
+    c = (Conn_serv*)malloc(sizeof(Conn_serv));
+
+    c->user = (char*)malloc(sizeof(char)*strlen(aux->user));
+
+    strcpy(c->user, aux->user);
+    c->sockfd = aux->sockfd;
+
     while (connectat){
-        printf("id B: %d\n", c->sockfd);
         //escoltem si el servidor ens envia un missatge
         p = llegeixPaquet(c->sockfd);
         switch(p.type){
@@ -77,6 +89,11 @@ static void *threadServ (void *servidor){
                     pthread_mutex_unlock(&mtxS);
 
                     connectat = 0;
+                }else if(strcmp(p.header, "[CONOK]") == 0){
+                    printf("L'usuari %s ha rebut el missatge\n", c->user);
+                    //VIGILAR AMB SEMÀFORS
+                    connectat = 0;
+                    //close(c->sockfd);
                 }
                 //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
@@ -89,14 +106,20 @@ static void *threadServ (void *servidor){
 }
 
 static void *threadCli (void *client){
-    Conn_cli *c = (Conn_cli *) client;      //informació del client que s'ha connectat
+    Conn_cli *aux= (Conn_cli *) client;  
+    Conn_cli *c;                            //informació del client que s'ha connectat
     Protocol p;                             //protocol de comunicació
     char connectat = 1;                     //variable que indica quan aturar el thread
-    printf("id A: %d\n", c->sockfd);
+
+    c = (Conn_cli*)malloc(sizeof(Conn_cli));
+
+    c->user = (char*)malloc(sizeof(char)*strlen(aux->user));
+
+    strcpy(c->user, aux->user);
+    c->sockfd = aux->sockfd;
 
     while (connectat){
         //escoltem si el client ens envia un missatge
-        printf("id B: %d\n", c->sockfd);
 
         p = llegeixPaquet(c->sockfd);
         switch(p.type){
@@ -151,16 +174,53 @@ static void *threadCli (void *client){
 }
 
 void iniciaThreadServidor(Conn_serv* servidor){
-    pthread_t t1;
-    pthread_create(&t1, NULL, threadServ, servidor);
+    tServ = (UserThread*)realloc(tServ, sizeof(UserThread)*(qServ+1));
+    tServ[qServ].user = servidor->user;
+
+    pthread_create(&(tServ[qServ].t), NULL, threadServ, servidor);
+    qServ++;
 }
 
 void iniciaThreadClient(Conn_cli* client){
-    pthread_t t1;
-    pthread_create(&t1, NULL, threadCli, client);
+    tCli = (UserThread*)realloc(tCli, sizeof(UserThread)*(qCli+1));
+    tCli[qCli].user = client->user;
+
+    pthread_create(&(tCli[qCli].t), NULL, threadCli, client);
+    qCli++;
 }
 
 void iniciaThreadEscolta(Config* config){
     pthread_t t1;
     pthread_create(&t1, NULL, threadEscolta, config);
+
+    tServ = (UserThread*)malloc(sizeof(UserThread));
+    tCli = (UserThread*)malloc(sizeof(UserThread));
+    qServ = 0;
+    qCli = 0;
 }
+
+
+
+
+void joinUserThread(char *user){
+
+    for (int i = 0; i < qServ; ++i)
+    {
+        if (strcmp(user, tServ[i].user) == 0)
+        {
+            pthread_join(tServ[i].t, NULL);
+        }
+    }
+
+    for (int i = 0; i < qCli; ++i)
+    {
+        if (strcmp(user, tCli[i].user) == 0)
+        {
+            pthread_join(tCli[i].t, NULL);
+        }
+    }
+
+}
+
+
+

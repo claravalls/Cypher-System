@@ -26,6 +26,11 @@ typedef struct {
     char *user;
 }Conn_cli;
 
+typedef struct{
+	pthread_t t;
+	char *user;
+}UserThread;
+
 /***********************************************
 * @Finalitat:   crear un thread que mantindrà al servidor a 
                 l'espera de noves connexions
@@ -53,5 +58,8 @@ void iniciaThreadClient(Conn_cli *client);
 * @Retorn:      ---
 ************************************************/
 void apagaServidor();
+
+
+void joinUserThread(char *user);
 
 #endif
