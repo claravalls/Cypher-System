@@ -56,7 +56,7 @@ static void *threadServ (void *servidor){
     char connectatS = 1;                     //variable que indica quan aturar el thread
     
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
-    c->user = (char*)malloc(sizeof(char)*strlen(aux->user));
+    c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
     strcpy(c->user, aux->user);
     c->sockfd = aux->sockfd;
 

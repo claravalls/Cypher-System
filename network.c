@@ -70,7 +70,6 @@ int connectServer(const char* ip, int port){
 
 int connectClient(int port, char *ip, char *myUsername){
     char* okMessage;
-    char * user;
     Protocol p;
 
     int sockc = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -107,18 +106,17 @@ int connectClient(int port, char *ip, char *myUsername){
 
     //esperem a rebre el nom paquet amb el nom d'usuari del servidor
     p = llegeixPaquet(sockc);
-    user = p.data;
     
-    if (user != NULL){
+    if (p.data != NULL){
         //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
-        conn_serv[qServ].user = user; 
+        conn_serv[qServ].user = p.data; 
 
         iniciaThreadServidor(&conn_serv[qServ], myUsername);
         qServ++;
 
         //mostrem el missatge de connexió OK
-        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(user) + 4); 
-        sprintf (okMessage, OK_CONN, port, user);
+        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(p.data) + 5); 
+        sprintf (okMessage, OK_CONN, port, p.data);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
         return 0;
@@ -203,8 +201,8 @@ Protocol llegeixPaquet(int fd){
     
     read(fd, &length, 2);
 
-    data = (char *) malloc(sizeof(char) * length);
-    read(fd, data, length);
+    data = (char *) malloc(length + 1);
+    read(fd, data, length + 1);
 
     p.type = type;
     p.header = header;
