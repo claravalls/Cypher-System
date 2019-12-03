@@ -15,7 +15,8 @@ Config getConfig(){
 
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
-    aux = (char*) malloc(sizeof(char) * strlen(PROMPT));
+
+    aux = (char*) malloc(sizeof(char) * (strlen(PROMPT) + strlen(config.user)));
     sprintf(aux, PROMPT, config.user);
     write(1, aux, strlen(aux));
     free(aux);
@@ -47,12 +48,6 @@ char* readUntil(int fd, char end, char lastChar) {
     return string;
 }
 
-/**
- * comanda: cadena sencera llegida
- * limit: caracter fins on hem de separar
- * i: casella inicial de la cadena comanda on començar a separar
- * casella: casella de l'array on guardar el valor separat
-*/
 void separaComanda(char *comanda, char limit, int i, int casella){
     int j = 0;
 
@@ -82,6 +77,8 @@ void separaComanda(char *comanda, char limit, int i, int casella){
             c[casella][j] = ' ';
             i++;
             j++;
+            c[casella] = (char *)realloc(c[casella], j+1);
+            
             while(comanda[i] != ' ' && comanda[i] != '\n'){
                 c[casella][j] = comanda[i];
                 i++;
@@ -148,6 +145,7 @@ char llegeixComanda(char *comanda){
     else if (strcasecmp(c[0], "SAY") == 0){
         opcio = 3;
         sizeofc = 2;
+
         //user
         c = (char **)realloc(c, sizeof(char*) * 2);
 
@@ -350,8 +348,6 @@ Config lecturaFitxer(const char *fitxer){
     return config;
 }
 
-
-
 void alliberaMemoriaC(){
     //alliberem memòria de c
     for (int i = 0; i < sizeofc; i++)
@@ -360,7 +356,6 @@ void alliberaMemoriaC(){
     }
     free(c);
 }
-
 
 void alliberaMemoriaConfig(Config *config){
     //alliberem memoria
@@ -415,7 +410,7 @@ void buscaPorts(int pipe, int myPort){
     }
     
     //mostrem el missatge de la quantitat de connexions disponibles
-    aux = (char *) malloc(sizeof(char) * strlen(CONN_AVAIL));
+    aux = (char *) malloc(sizeof(char) * strlen(CONN_AVAIL)); //NO SE SI EL STRLEN ESTA BE
     sprintf(aux, CONN_AVAIL, nConn);
     write(1, aux, strlen(aux));
     free(aux);

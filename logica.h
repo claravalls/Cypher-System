@@ -28,6 +28,7 @@
 #define ERR_OPTION "Error, invalid option\n"
 #define ERR_ARGS "Not enough arguments\n"
 
+//Estructura de la configuració del fitxer .dat
 typedef struct{
     char *user;
     char *dirAudios;
