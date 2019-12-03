@@ -73,7 +73,7 @@ int connectClient(int port, char *ip, char *myUsername){
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
-        okMessage = (char *) malloc(sizeof(char) * (strlen(ERR_CON_PORT) + strlen(ip))); //CAL SUMARLI PORT??
+        okMessage = (char *) malloc(sizeof(char) * (strlen(ERR_CON_PORT) + strlen(ip) + 4)); //Cal sumar-li 4 pel port
         sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -100,7 +100,7 @@ int connectClient(int port, char *ip, char *myUsername){
         qServ++;
 
         //mostrem el missatge de connexió OK
-        okMessage = (char *) malloc(sizeof(char) * (strlen(ERR_CON_PORT) + strlen(ip))); //SUMARLI PORT??
+        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(ip) + strlen(user));
         sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -144,8 +144,9 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 
     //creem el paquet a enviar
     p.type = type;
-    p.header = (char*) malloc(sizeof(char) * strlen(header));
-    p.header = header;
+    p.header = (char*) malloc(strlen(header) + 1);
+    strcpy(p.header, header);
+
     p.length = length;
 
     if(length !=  0){
