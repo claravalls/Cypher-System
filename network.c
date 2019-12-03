@@ -90,7 +90,7 @@ int connectClient(int port, char *ip, char *myUsername){
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
-        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
+        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(ip) + 4);
         sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -117,7 +117,7 @@ int connectClient(int port, char *ip, char *myUsername){
         qServ++;
 
         //mostrem el missatge de connexió OK
-        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
+        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(user) + 4); 
         sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);

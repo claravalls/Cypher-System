@@ -82,6 +82,8 @@ void separaComanda(char *comanda, char limit, int i, int casella){
             c[casella][j] = ' ';
             i++;
             j++;
+            c[casella] = (char *)realloc(c[casella], sizeof(char) * (j+1));
+            
             while(comanda[i] != ' ' && comanda[i] != '\n'){
                 c[casella][j] = comanda[i];
                 i++;
