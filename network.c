@@ -116,7 +116,7 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-    missatge = (char *) malloc(sizeof(char) * (strlen(port)));
+    missatge = (char *) malloc(strlen(port) + 2);
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
