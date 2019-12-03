@@ -5,24 +5,9 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
-//semaphore* sDesconnexio;
-
 void setSockfd(int fd){ 
     mySock = fd;
 }
-
-/*int initSemaphore(){
-    sDesconnexio = (semaphore *) malloc(sizeof(semaphore));
-    int fail = SEM_constructor_with_name (sDesconnexio, ftok("network.c", 1234));
-    if(!fail){
-        SEM_init(sDesconnexio, 0);
-    }
-    return fail;
-}
-
-semaphore* getSemaphoreDes(){
-    return sDesconnexio;
-}*/
 
 void afegeixClient(int newsock, char* user, char *clientName){    
     //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió
@@ -90,7 +75,8 @@ int connectClient(int port, char *ip, char *myUsername){
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
-        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
+        okMessage = (char *) malloc(sizeof(char) * (strlen(ERR_CON_PORT) + strlen(ip) + 4)); //Cal sumar-li 4 pel port
+
         sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -117,7 +103,8 @@ int connectClient(int port, char *ip, char *myUsername){
         qServ++;
 
         //mostrem el missatge de connexió OK
-        okMessage = (char *) malloc(sizeof(char) * strlen(ERR_CON_PORT)); //SUMARLI LA MIDA DE IP I PORT
+        okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(ip) + strlen(user));
+
         sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -129,7 +116,7 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-    missatge = (char *) malloc(sizeof(char) * (strlen(port)));
+    missatge = (char *) malloc(strlen(port) + 2);
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
@@ -160,8 +147,9 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 
     //creem el paquet a enviar
     p.type = type;
-    p.header = (char*) malloc(sizeof(char) * strlen(header));
-    p.header = header;
+    p.header = (char*) malloc(strlen(header) + 1);
+    strcpy(p.header, header);
+
     p.length = length;
 
     if(length !=  0){
