@@ -112,7 +112,8 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-    missatge = (char *) malloc(sizeof(char) * (strlen(port)));
+
+    missatge = (char *) malloc(sizeof(char) * strlen(port) + 2);
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
@@ -120,7 +121,7 @@ char * comprovaNomUsuari(char *port, int myPort){
     }
     else{
         //posem el missatge a mostrar com al número del port
-        strcpy(missatge, port);     
+        strcpy(missatge, port);  
         strcat(missatge, "\n");
 
         //recorrem l'array de connexions per veure si ja està connectada i tenim el nom d'usuari guardat
