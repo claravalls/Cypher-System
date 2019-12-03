@@ -29,6 +29,7 @@ typedef struct {
 typedef struct{
 	pthread_t t;
 	char *user;
+	int listener;
 }UserThread;
 
 /***********************************************
@@ -44,14 +45,14 @@ void iniciaThreadEscolta(Config* config);
 * @Parametres:  servidor: informació del servidor a qui està escoltant
 * @Retorn:      ---
 ************************************************/
-void iniciaThreadServidor(Conn_serv *servidor);
+void iniciaThreadServidor(Conn_serv *servidor, char *user);
 /***********************************************
 * @Finalitat:   crear un thread que estarà escoltant constantment
                 al client per si envia algun missatge
 * @Parametres:  client: informació del client a qui està escoltant
 * @Retorn:      ---
 ************************************************/
-void iniciaThreadClient(Conn_cli *client);
+void iniciaThreadClient(Conn_cli *client, char *user);
 /***********************************************
 * @Finalitat:   aturar el thread del servidor que espera noves connexions
 * @Parametres:  ---
@@ -61,5 +62,7 @@ void apagaServidor();
 
 
 void joinUserThread(char *user);
+
+void shiftJoins(UserThread *tThread, char *user, int lenght);
 
 #endif

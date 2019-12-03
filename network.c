@@ -36,9 +36,8 @@ void afegeixClient(int newsock, char* user, char *clientName){
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 
     //creem el thread del client
-    iniciaThreadClient(&conn_clients[qClients - 1]);
+    iniciaThreadClient(&conn_clients[qClients - 1], user);
 
-    printf("Tenim %d clients connectats\n", qClients);
 }
 
 int connectServer(const char* ip, int port){
@@ -114,7 +113,7 @@ int connectClient(int port, char *ip, char *myUsername){
         //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
         conn_serv[qServ].user = user; 
 
-        iniciaThreadServidor(&conn_serv[qServ]);
+        iniciaThreadServidor(&conn_serv[qServ], myUsername);
         qServ++;
 
         //mostrem el missatge de connexió OK
@@ -262,49 +261,27 @@ void tancaConnexions(){
     //avisem a tots els clients connectats que es tancarà la connexió
     while(i < qClients) {
         enviaPaquet(conn_clients[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-        printf("Enviem el paquet de desconnexio al client %s\n", conn_clients[i].user);
 
-        /*p = llegeixPaquet(conn_clients[i].sockfd);
-
-        printf("Llegim el paquet amb header %s\n", p.header);
-
-        //comprovem que ha rebut el missatge. Sino, el tornarem a enviar
-        if(strcmp(p.header, "[CONKO]") != 0){
-            printf("L'usuari %s ha rebut el missatge\n", conn_clients[i].user);
-            //VIGILAR AMB SEMÀFORS
-            close(conn_clients[i].sockfd);
-            i++;
-        }*/
         i++;
     }
-
+    i = 0;
     //avisem a tots els servidors que es tancarà la connexió
     while(i < qServ) {
         enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-        printf("Enviem el paquet de desconnexio al servidor %s desde el sockfd %d\n", conn_serv[i].user, conn_serv[i].sockfd);
 
-        printf("L'usuari %s ha rebut el missatge\n", conn_serv[i].user);
-        //VIGILAR AMB SEMÀFORS
-        close(conn_serv[i].sockfd);
+        //close(conn_serv[i].sockfd);
         i++;
         
     }
-
     joinUserThread(config.user);
 }
 
 void eliminaConnexioCli(char *user){
     int s = 0, b;
-
-
-    for (int i = 0; i < qClients; ++i)
-    {
-        printf("NEW CONN CLIENT: %d %s\n",conn_clients[i].sockfd, conn_clients[i].user );
-    }
-
     //busquem al client a l'array
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
+
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qClients; i++){
@@ -319,7 +296,6 @@ void eliminaConnexioCli(char *user){
             break;
         }
     }
-    printf("Connexió amb %s tancada\n", user);
 }
 
 void eliminaConnexioServ(char *user){
@@ -327,6 +303,7 @@ void eliminaConnexioServ(char *user){
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
+
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qServ; i++){
@@ -341,5 +318,4 @@ void eliminaConnexioServ(char *user){
             break;
         }
     }
-    printf("Connexió amb %s tancada\n", user);
 }

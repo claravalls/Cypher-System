@@ -28,7 +28,7 @@
 typedef struct{
     unsigned char type;
     char * header;
-    unsigned int length;
+    short length;
     char * data;
 }Protocol;
 
