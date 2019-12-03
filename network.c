@@ -16,11 +16,13 @@ void afegeixClient(int newsock, char* user, char *clientName){
     conn_clients[qClients].user = clientName;
     qClients++;
 
+
     //notifiquem al client que la connexió ha funcionat
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 
     //creem el thread del client
     iniciaThreadClient(&conn_clients[qClients - 1], user);
+
 }
 
 int connectServer(const char* ip, int port){
@@ -74,6 +76,7 @@ int connectClient(int port, char *ip, char *myUsername){
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
         okMessage = (char *) malloc(sizeof(char) * (strlen(ERR_CON_PORT) + strlen(ip) + 4)); //Cal sumar-li 4 pel port
+
         sprintf(okMessage, ERR_CON_PORT, ip, port);
         write(1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -101,6 +104,7 @@ int connectClient(int port, char *ip, char *myUsername){
 
         //mostrem el missatge de connexió OK
         okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(ip) + strlen(user));
+
         sprintf (okMessage, OK_CONN, port, user);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
@@ -112,8 +116,7 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-
-    missatge = (char *) malloc(sizeof(char) * strlen(port) + 2);
+    missatge = (char *) malloc(sizeof(char) * (strlen(port)));
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
@@ -121,7 +124,7 @@ char * comprovaNomUsuari(char *port, int myPort){
     }
     else{
         //posem el missatge a mostrar com al número del port
-        strcpy(missatge, port);  
+        strcpy(missatge, port);     
         strcat(missatge, "\n");
 
         //recorrem l'array de connexions per veure si ja està connectada i tenim el nom d'usuari guardat
@@ -162,10 +165,6 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     write(fd, p.header, strlen(p.header));
     write(fd, &p.length, 2);
     write(fd, p.data, strlen(p.data));
-
-    //alliberem memòria
-    free(p.data);
-    free(p.header);
 }
 
 Protocol llegeixPaquet(int fd){
@@ -204,25 +203,22 @@ Protocol llegeixPaquet(int fd){
 
 void freeConnections(){                    
     write(1, CLOSING, strlen(CLOSING));
-    //recorrem l'array de servidors connectats 
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
     free(conn_serv);
     
-    //recorrem l'array de clients connectats
     for (int i = 0; i < qClients; i++){
         free(conn_clients[i].user);
     }
     free(conn_clients);
 
-    //tanquem el nostre servidor
     close(mySock);
 }
 
 void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
-    aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user)));
+    aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user))); //SUMAR MIDA DE USER I MISSATGE
     sprintf(aux, MESSAGE, user, missatge);
     write(1, aux, strlen(aux));
     free(aux);
@@ -249,18 +245,22 @@ void tancaConnexions(){
     //agafem el nom de l'usuari
     Config config = getConfig();
 
+
     //avisem a tots els clients connectats que es tancarà la connexió
     while(i < qClients) {
         enviaPaquet(conn_clients[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
+
         i++;
     }
     i = 0;
     //avisem a tots els servidors que es tancarà la connexió
     while(i < qServ) {
         enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-        i++;        
+
+        //close(conn_serv[i].sockfd);
+        i++;
+        
     }
-    //Fem el join dels threads
     joinUserThread(config.user);
 }
 
@@ -269,6 +269,7 @@ void eliminaConnexioCli(char *user){
     //busquem al client a l'array
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
+
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qClients; i++){
@@ -290,6 +291,7 @@ void eliminaConnexioServ(char *user){
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
+
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qServ; i++){

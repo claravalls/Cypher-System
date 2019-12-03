@@ -7,10 +7,11 @@ pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxArrayS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxArrayC = PTHREAD_MUTEX_INITIALIZER;
 
-UserThread *tServ;                  //array de threads iniciats per escoltar un Servidor
-UserThread *tCli;                   //array de threads iniciats per escoltar un Client
-int qTServ;                         //quantitat de threads de Servidors
-int qTCli;                          //quantitat de threads de Clients
+
+UserThread *tServ;
+UserThread *tCli;
+int qTServ;
+int qTCli;
 
 
 static void *threadEscolta (void *config){
@@ -21,13 +22,11 @@ static void *threadEscolta (void *config){
     Protocol p;                     //protocol de comunicació
     
     while (apaga){
-        //Preparem per acceptar un nou client
         struct sockaddr_in s_addr;
         socklen_t len = sizeof (s_addr);
         socket = c->sockfd;
         newsock = accept (socket, (void *) &s_addr, &len);
         if (newsock < 0) {
-            //No s'ha pogut acceptar
             write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
             return (void *) -1;
         }
@@ -40,7 +39,6 @@ static void *threadEscolta (void *config){
             close(newsock);
         }
         else {
-            //Afegim el client a l'array de connexions
             afegeixClient(newsock, c->user, clientName);
         }
     }
@@ -52,10 +50,10 @@ void apagaServidor(){
 }
 
 static void *threadServ (void *servidor){
-    Conn_serv *aux = (Conn_serv *) servidor;    //informació del client que s'ha connectat
-    Conn_serv *c;                               
-    Protocol p;                                 //protocol de comunicació
-    char connectatS = 1;                        //variable que indica quan aturar el thread
+    Conn_serv *aux = (Conn_serv *) servidor;   //informació del client que s'ha connectat
+    Conn_serv *c;
+    Protocol p;                             //protocol de comunicació
+    char connectatS = 1;                     //variable que indica quan aturar el thread
     
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
     c->user = (char*)malloc(strlen(aux->user) + 1);
@@ -83,36 +81,32 @@ static void *threadServ (void *servidor){
                     //enviar el paquet de desconnexió OK
                     enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, "");
 
-                    //Actualitzem l'array de connexions eliminant la corresponent a aquest thread
+                    //S'ha de modificar l'array de conn_serv i restar una qServ;
                     pthread_mutex_lock(&mtxS);
                     eliminaConnexioServ(c->user);
                     pthread_mutex_unlock(&mtxS);
 
                 }else if(strcmp(p.header, "[CONOK]") == 0){
-                    //aturem el thread i tanquem el file descriptor
-                    connectatS = 0;  
+                    connectatS = 0;
                     close(c->sockfd);
-
-                    //alliberem la memòria de c:
-                    free(c->user);
-                    free(c);
                 }
+                //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
         }
     }
-    //eliminem el semàfor utilitzat
+
+
     pthread_mutex_destroy(&mtxS);
 
     return NULL;
 }
 
 static void *threadCli (void *client){
-    Conn_cli *aux= (Conn_cli *) client;     //informació del client que s'ha connectat
-    Conn_cli *c;                            
+    Conn_cli *aux= (Conn_cli *) client;  
+    Conn_cli *c;                            //informació del client que s'ha connectat
     Protocol p;                             //protocol de comunicació
     char connectatC = 1;                    //variable que indica quan aturar el thread
 
-    //Demanem memòria per guardar la informació del client
     c = (Conn_cli*)malloc(sizeof(Conn_cli));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user));
     strcpy(c->user, aux->user);
@@ -120,8 +114,8 @@ static void *threadCli (void *client){
 
     while (connectatC){
         //escoltem si el client ens envia un missatge
-        p = llegeixPaquet(c->sockfd);
 
+        p = llegeixPaquet(c->sockfd);
         switch(p.type){
             case 0x02:
                 if(strcmp(p.header, "[MSG]") == 0){
@@ -144,50 +138,39 @@ static void *threadCli (void *client){
                     //enviar el paquet de desconnexió OK
                     enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, "");
 
-                    //Actualitzem l'array de connexions eliminant la corresponent a aquest thread
+                    //S'ha de modificar l'array de conn_serv i restar una qServ;
                     pthread_mutex_lock(&mtxC);
                     eliminaConnexioCli(c->user);
                     pthread_mutex_unlock(&mtxC);
                 }
                 else if(strcmp(p.header, "[CONKO]") != 0){
-                    //aturem el thread i tanquem el file descriptor
                     connectatC = 0;
                     close(c->sockfd);
-
-                    //alliberem la memòria de c:
-                    free(c->user);
-                    free(c);
                 }
                 break;
         }
     }
-    //eliminem el semàfor utilitzat
+
+
+
     pthread_mutex_destroy(&mtxC);
     return NULL;
 }
 
 void iniciaThreadServidor(Conn_serv* servidor, char *user){
-    //redimensionem l'array de threads de Servidors
     tServ = (UserThread*)realloc(tServ, sizeof(UserThread)*(qTServ+1));
-    
-    //guardem la informació del servidor
     tServ[qTServ].user = user;
     tServ[qTServ].listener = servidor->sockfd;
-    
-    //creem el thread
+
     pthread_create(&(tServ[qTServ].t), NULL, threadServ, servidor);
     qTServ++;
 }
 
 void iniciaThreadClient(Conn_cli* client, char *user){
-    //redimensionem l'array de threads de Clients
     tCli = (UserThread*)realloc(tCli, sizeof(UserThread)*(qTCli+1));
-
-    //Guardem la infomració del client
     tCli[qTCli].user = user;
     tCli[qTCli].listener = client->sockfd;
 
-    //creem el thread
     pthread_create(&(tCli[qTCli].t), NULL, threadCli, client);
     qTCli++;
 }
@@ -196,7 +179,6 @@ void iniciaThreadEscolta(Config* config){
     pthread_t t1;
     pthread_create(&t1, NULL, threadEscolta, config);
 
-    //inicialitzem l'array de threads de Servidor i Client i els comptadors
     tServ = (UserThread*)malloc(sizeof(UserThread));
     tCli = (UserThread*)malloc(sizeof(UserThread));
     qTServ = 0;
@@ -205,17 +187,14 @@ void iniciaThreadEscolta(Config* config){
 
 
 void joinUserThread(char *user){
-    //Recorrerem l'array de threads creats escoltant a Servidors
-    for (int i = 0; i < qTServ; ++i){   
-        //Mirem si el thread pertany a l'usuari que es vol desconnectar
-        if (strcmp(user, tServ[i].user) == 0){
-            //aquest enviament aturarà el thread del Servidor que escolta al Client que es vol desconnectar
+
+    for (int i = 0; i < qTServ; ++i)
+    {
+        if (strcmp(user, tServ[i].user) == 0)
+        {
             enviaPaquet(tServ[i].listener, 0x06, "[CONOK]", strlen(user), user);
 
-            //esperem que el thread acabi
             pthread_join(tServ[i].t, NULL);
-
-            //actualitzem l'array de threads del Servidor
             pthread_mutex_lock(&mtxArrayS);
             shiftJoins(tServ, user, qTServ);                    
             qTServ--;
@@ -223,17 +202,13 @@ void joinUserThread(char *user){
         }
     }
 
-    //Recorrerem l'array de threads creats escoltant a Clients
-    for (int i = 0; i < qTCli; ++i){
-        //Mirem si el thread pertany a l'usuari que es vol desconnectar
-        if (strcmp(user, tCli[i].user) == 0){
-            //enviem el paquet que aturarà el thread del Client que escolta al Servidor que es vol desconnectar
+    for (int i = 0; i < qTCli; ++i)
+    {
+        if (strcmp(user, tCli[i].user) == 0)
+        {
             enviaPaquet(tCli[i].listener, 0x06, "[CONOK]", strlen(user), user);
 
-            //esperem que el thread acabi
             pthread_join(tCli[i].t, NULL);
-
-            //actualitzem l'array de threads del Client
             pthread_mutex_lock(&mtxArrayC);
             shiftJoins(tCli, user, qTCli);
             qTCli--;
@@ -241,10 +216,10 @@ void joinUserThread(char *user){
         }
     }
 
-    //destruïm els semàfors
     pthread_mutex_destroy(&mtxArrayS);
     pthread_mutex_destroy(&mtxArrayC);
 }
+
 
 
 void shiftJoins(UserThread *tThread, char *user, int lenght){
@@ -261,6 +236,7 @@ void shiftJoins(UserThread *tThread, char *user, int lenght){
                 s++;
             }
             tThread = (UserThread *) realloc(tThread, sizeof(UserThread) * (lenght - 1));
+
         }
     }
 }
