@@ -15,7 +15,7 @@ Config getConfig(){
 
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
-    aux = (char*) malloc(sizeof(char) * strlen(PROMPT));
+    aux = (char*) malloc(sizeof(char) * (strlen(PROMPT) + strlen(config.user)));
     sprintf(aux, PROMPT, config.user);
     write(1, aux, strlen(aux));
     free(aux);
