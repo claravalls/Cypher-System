@@ -25,7 +25,6 @@
 #define MESSAGE "\n[%s]: %s\n"
 #define ERR_USER "This user does not exists\n"
 
-//Estructura que guardarà el paquet a enviar o llegir seguin el protocol especificat
 typedef struct{
     unsigned char type;
     char * header;
@@ -132,5 +131,9 @@ void eliminaConnexioServ(char *user);
 * @Retorn:      ---
 ************************************************/
 void tancaConnexions();
+
+/*int initSemaphore();
+
+semaphore* getSemaphoreDes();*/
 
 #endif

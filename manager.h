@@ -82,7 +82,7 @@ char ** getValues();
 * @Parametres:  fd: file descriptor on s'ha de fer la lectura
                 end: caràcter que indicarà final de lectura
                 lastChar: caràcter que s'ha de posar al final de la cadena llegida
-* @Retorn:      retorna la cadena llegida
+* @Retorn:
 ************************************************/
 char* readUntil(int fd, char end, char lastChar);
 /***********************************************

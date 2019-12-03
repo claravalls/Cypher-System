@@ -41,7 +41,7 @@ void optionShowC(char ** sysports, int myPort){
     
     pid_t pid = fork ();
     switch (pid){
-        case 0: //el fill
+        case 0:
             close(fd[0]);
             dup2(fd[1], 1);
 
@@ -53,7 +53,7 @@ void optionShowC(char ** sysports, int myPort){
         case -1:
             write(1, ERR_CONN, strlen(ERR_CONN));
             break;
-        default: //el pare
+        default:
             close(fd[1]);
             //esperem que acabi d'escriure
             wait(NULL);

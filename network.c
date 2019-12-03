@@ -282,6 +282,7 @@ void eliminaConnexioCli(char *user){
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
 
+            printf("SOCKFD client: %d\n",conn_clients[b].sockfd);
             s = b + 1;
             //shiftem els valors a l'esquerra
             for (int i = b; i < qClients; i++){
@@ -296,6 +297,7 @@ void eliminaConnexioCli(char *user){
             break;
         }
     }
+    printf("Connexió C amb %s tancada\n", user);
 }
 
 void eliminaConnexioServ(char *user){
@@ -303,6 +305,7 @@ void eliminaConnexioServ(char *user){
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
+            printf("SOCKFD server: %d\n",conn_serv[b].sockfd);
 
             s = b + 1;
             //shiftem els valors a l'esquerra
@@ -318,4 +321,5 @@ void eliminaConnexioServ(char *user){
             break;
         }
     }
+    printf("Connexió S amb %s tancada\n", user);
 }
