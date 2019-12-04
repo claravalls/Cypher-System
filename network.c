@@ -127,7 +127,7 @@ int connectClient(int port, char *ip, char *myUsername){
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-    missatge = (char *) malloc(strlen(port) + 2);
+    missatge = (char *) malloc(strlen(port) + 2); //Pel \n que afegirem i el \0 que afegeix el strcpy
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
@@ -140,12 +140,14 @@ char * comprovaNomUsuari(char *port, int myPort){
 
         //recorrem l'array de connexions per veure si ja està connectada i tenim el nom d'usuari guardat
         for (int i = 0; i < qServ; i++){     
+            
             //si ja està connectat, mostrarem el missatge amb el port i el nom d'usuari 
             if (conn_serv[i].port == p){
+                
                 //sobreescriurem el missatge a mostrar
-                missatge = (char *) realloc(missatge, (sizeof(char) * 7));
-                strcpy(missatge, "");
-                sprintf(missatge, "\n%d %s\n", p, conn_serv[i].user);
+                missatge = (char *) realloc(missatge, strlen(CONN_WITH_NAME) + strlen(conn_serv[i].user) + 4); //+ 4 pel port
+                sprintf(missatge, CONN_WITH_NAME, p, conn_serv[i].user);
+                
                 break;
             }
         }

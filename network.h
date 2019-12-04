@@ -24,6 +24,7 @@
 #define CLOSING "Closing all connections...\n"
 #define MESSAGE "\n[%s]: %s\n"
 #define ERR_USER "This user does not exists\n"
+#define CONN_WITH_NAME "\n%d %s\n"
 
 typedef struct{
     unsigned char type;
