@@ -108,7 +108,7 @@ static void *threadCli (void *client){
     char connectatC = 1;                    //variable que indica quan aturar el thread
 
     c = (Conn_cli*)malloc(sizeof(Conn_cli));
-    c->user = (char*)malloc(sizeof(char)*strlen(aux->user));
+    c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
     strcpy(c->user, aux->user);
     c->sockfd = aux->sockfd;
 

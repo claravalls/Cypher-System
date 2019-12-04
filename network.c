@@ -276,22 +276,22 @@ void eliminaConnexioCli(char *user){
         if(strcmp(user, conn_clients[b].user) == 0){
 
             s = b + 1;
-            //if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
+            if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
                 for (int i = b; i < qClients; i++){
                     conn_clients[b] = conn_clients[s];
                     b++;
                     s++;
                 }
-            //}
+            }
 
-            //if(qClients == 1){ //es l'ultim client
-              //  free(conn_clients);
-            //}
-            //else{
+            if(qClients == 1){ //es l'ultim client
+                free(conn_clients);
+            }
+            else{
                 //redimensionem la mida de l'array
                 conn_clients = (Conn_cli *) realloc(conn_clients, sizeof(Conn_cli) * (qClients - 1));
-            //}
+            }
             qClients--;
         
             break;
