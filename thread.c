@@ -143,7 +143,7 @@ static void *threadCli (void *client){
                     eliminaConnexioCli(c->user);
                     pthread_mutex_unlock(&mtxC);
                 }
-                else if(strcmp(p.header, "[CONKO]") != 0){
+                else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatC = 0;
                     close(c->sockfd);
                 }

@@ -185,6 +185,7 @@ Protocol llegeixPaquet(int fd){
     Protocol p;
 
     nbytes = read(fd, &type, 1);
+
     //si no hem rebut cap missatge, retornarem un paquet amb data NULL
     if (nbytes == 0){
         p.data = NULL;
@@ -192,22 +193,17 @@ Protocol llegeixPaquet(int fd){
     }
 
     header = readUntil(fd, ']', ']');
-
-    //si el header indica KO, retornarem un paquet amb data NULL
-    if(strcmp(header, "[CONKO]") == 0){
-        p.data = NULL;
-        return p;
-    }
     
     read(fd, &length, 2);
 
     data = (char *) malloc(length + 1);
-    read(fd, data, length + 1);
+    read(fd, data, length);
 
     p.type = type;
     p.header = header;
     p.length = length;
     p.data = data;
+
     return p;
 }
 
@@ -259,7 +255,6 @@ void tancaConnexions(){
     //avisem a tots els clients connectats que es tancarà la connexió
     while(i < qClients) {
         enviaPaquet(conn_clients[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-
         i++;
     }
     i = 0;
@@ -281,16 +276,24 @@ void eliminaConnexioCli(char *user){
         if(strcmp(user, conn_clients[b].user) == 0){
 
             s = b + 1;
-            //shiftem els valors a l'esquerra
-            for (int i = b; i < qClients; i++){
-                conn_clients[b] = conn_clients[s];
-                b++;
-                s++;
-            }
+            //if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
+                //shiftem els valors a l'esquerra
+                for (int i = b; i < qClients; i++){
+                    conn_clients[b] = conn_clients[s];
+                    b++;
+                    s++;
+                }
+            //}
 
-            //redimensionem la mida de l'array
-            conn_clients = (Conn_cli *) realloc(conn_clients, sizeof(Conn_cli) * (qClients - 1));
+            //if(qClients == 1){ //es l'ultim client
+              //  free(conn_clients);
+            //}
+            //else{
+                //redimensionem la mida de l'array
+                conn_clients = (Conn_cli *) realloc(conn_clients, sizeof(Conn_cli) * (qClients - 1));
+            //}
             qClients--;
+        
             break;
         }
     }
