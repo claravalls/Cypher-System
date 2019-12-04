@@ -306,16 +306,24 @@ void eliminaConnexioServ(char *user){
         if(strcmp(user, conn_serv[b].user) == 0){
 
             s = b + 1;
-            //shiftem els valors a l'esquerra
-            for (int i = b; i < qServ; i++){
-                conn_serv[b] = conn_serv[s];
-                b++;
-                s++;
+            if(s < qServ){ //si hem d'eliminar l'últim valor no cal shiftar
+                //shiftem els valors a l'esquerra
+                for (int i = b; i < qServ; i++){
+                    conn_serv[b] = conn_serv[s];
+                    b++;
+                    s++;
+                }
             }
 
-            //redimensionem la mida de l'array
-            conn_serv = (Conn_serv *) realloc(conn_serv, sizeof(Conn_serv) * (qServ - 1));
+            if(qServ == 1){ //es l'ultim servidor
+                free(conn_serv);
+            }
+            else{
+                //redimensionem la mida de l'array
+                conn_serv = (Conn_serv *) realloc(conn_serv, sizeof(Conn_serv) * (qServ - 1));
+            }
             qServ--;
+
             break;
         }
     }
