@@ -5,24 +5,9 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
-//semaphore* sDesconnexio;
-
 void setSockfd(int fd){ 
     mySock = fd;
 }
-
-/*int initSemaphore(){
-    sDesconnexio = (semaphore *) malloc(sizeof(semaphore));
-    int fail = SEM_constructor_with_name (sDesconnexio, ftok("network.c", 1234));
-    if(!fail){
-        SEM_init(sDesconnexio, 0);
-    }
-    return fail;
-}
-
-semaphore* getSemaphoreDes(){
-    return sDesconnexio;
-}*/
 
 void afegeixClient(int newsock, char* user, char *clientName){    
     //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió

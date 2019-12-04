@@ -13,6 +13,9 @@ void optionExit(){
     //deixem d'escoltar connexions
     apagaServidor();
 
+    //allibera memoria Config
+    alliberaConfig();
+
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);
 }

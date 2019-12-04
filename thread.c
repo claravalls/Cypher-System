@@ -89,6 +89,8 @@ static void *threadServ (void *servidor){
                 }else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatS = 0;
                     close(c->sockfd);
+                    free(c->user);
+                    free(c);
                 }
                 //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
@@ -146,6 +148,8 @@ static void *threadCli (void *client){
                 else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatC = 0;
                     close(c->sockfd);
+                    free(c->user);
+                    free(c);
                 }
                 break;
         }

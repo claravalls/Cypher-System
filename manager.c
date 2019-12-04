@@ -13,6 +13,16 @@ Config getConfig(){
     return config;
 }
 
+void alliberaConfig(){
+    free(config.user);
+    free(config.dirAudios);
+    free(config.ip);
+    free(config.ipWeb);
+    free(config.sysports[0]);
+    free(config.sysports[1]);
+    free(config.sysports);
+}
+
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
     aux = (char*) malloc(sizeof(char) * (strlen(PROMPT) + strlen(config.user)));
@@ -400,6 +410,7 @@ void buscaPorts(int pipe, int myPort){
 
         //comprovo si se el nom de l'usuari
         missatge = comprovaNomUsuari(port, myPort);
+        free(port);
 
         //comprovem que no es mostri el nostre port
         if(missatge != NULL){ 

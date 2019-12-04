@@ -30,6 +30,13 @@ void setConfig(Config c);
 ************************************************/
 Config getConfig();
 /***********************************************
+* @Finalitat:   allibera la memòria demanada per guardar els valors 
+                de la configuració llegida al fitxer
+* @Parametres:  ---
+* @Retorn:      ---
+************************************************/
+void alliberaConfig();
+/***********************************************
 * @Finalitat:   mostrar el prompt amb el nom de l'usuari pel terminal
 * @Parametres:  ---
 * @Retorn:      ---
