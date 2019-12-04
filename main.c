@@ -18,6 +18,7 @@ int main(int argc, const char* argv[]){
 
     if (argc != 2){
         write(1, ERR_ARGS, strlen(ERR_ARGS));
+        return -1;
     }
 
     //reconfigurem la senyal SIGINT
@@ -40,9 +41,6 @@ int main(int argc, const char* argv[]){
     //guardem el valor del nostre socket
     setSockfd(sockfd);
     config.sockfd = sockfd;
-
-    //guardem els valors llegits
-    setConfig(config);
 
     //iniciem el thread del servidor per acceptar connexions
     iniciaThreadEscolta(&config); 

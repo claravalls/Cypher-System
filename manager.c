@@ -5,27 +5,13 @@ char ** c;              //comanda entrada
 char sizeofc;           //quantitat de paraules de la comanda
 Config config;          //valors del fitxer de configuració
 
-void setConfig(Config c){
-    config = c;
-}
-
 Config getConfig(){
     return config;
 }
 
-void alliberaConfig(){
-    free(config.user);
-    free(config.dirAudios);
-    free(config.ip);
-    free(config.ipWeb);
-    free(config.sysports[0]);
-    free(config.sysports[1]);
-    free(config.sysports);
-}
-
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
-    aux = (char*) malloc(sizeof(char) * (strlen(PROMPT) + strlen(config.user)));
+    aux = (char*) malloc(strlen(PROMPT) + strlen(config.user));
     sprintf(aux, PROMPT, config.user);
     write(1, aux, strlen(aux));
     free(aux);
@@ -236,7 +222,6 @@ Config lecturaFitxer(const char *fitxer){
 	int i = 0;              //variable que anirà recorrent la cadena
     int f;                  //file descriptor del fitxer    
     char * aux;             //cadena auxiliar per llegir valors enters
-    Config config;          //valors del fitxer de configuració a retornar
 
 	//obrim el fitxer
     f = open(fitxer, O_RDONLY);
@@ -366,7 +351,7 @@ Config lecturaFitxer(const char *fitxer){
 
 void alliberaMemoriaC(){
     //alliberem memòria de c
-    for (int i = 0; i < sizeofc; i++)
+    for (int i = 0; i <= sizeofc; i++)
     {
         free(c[i]);
     }
@@ -379,6 +364,8 @@ void alliberaMemoriaConfig(Config *config){
     free(config->user);
     free(config->dirAudios);
     free(config->ip);
+    free(config->sysports[0]);
+    free(config->sysports[1]);
     free(config->sysports);
     free(config->ipWeb);
 }
@@ -416,9 +403,14 @@ void buscaPorts(int pipe, int myPort){
         if(missatge != NULL){ 
             //redimensionem per afegir una nova connexió
             connexions = (char **) realloc(connexions, sizeof(char *) * (nConn + 1));
-            connexions[nConn] = missatge;
+            connexions[nConn] = (char*)malloc(strlen(missatge) + 1);
+            
+            strcpy(connexions[nConn], missatge);
+            
             nConn++;
         } 
+
+        free(missatge);
 
         //llegeixo el que queda
         extra = readUntil(pipe, '\n', '\n');

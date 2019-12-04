@@ -47,6 +47,9 @@ static void *threadEscolta (void *config){
 
 void apagaServidor(){
     apaga = 0;
+
+    free(tServ);
+    free(tCli);
 }
 
 static void *threadServ (void *servidor){

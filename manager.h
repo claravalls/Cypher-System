@@ -18,24 +18,11 @@
 #define PROMPT "\n$%s: "
 
 /***********************************************
-* @Finalitat:   guardar el valor de la configuració llegida al fitxer
-* @Parametres:  c: variable de tipus Config amb la informació del fitxer
-* @Retorn:      ---
-************************************************/
-void setConfig(Config c);
-/***********************************************
 * @Finalitat:   retornar el valor de la configuració llegida al fitxer
 * @Parametres:  ---
 * @Retorn:      retorna la informació llegida del fitxer
 ************************************************/
 Config getConfig();
-/***********************************************
-* @Finalitat:   allibera la memòria demanada per guardar els valors 
-                de la configuració llegida al fitxer
-* @Parametres:  ---
-* @Retorn:      ---
-************************************************/
-void alliberaConfig();
 /***********************************************
 * @Finalitat:   mostrar el prompt amb el nom de l'usuari pel terminal
 * @Parametres:  ---
