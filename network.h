@@ -133,8 +133,6 @@ void eliminaConnexioServ(char *user);
 ************************************************/
 void tancaConnexions();
 
-/*int initSemaphore();
-
-semaphore* getSemaphoreDes();*/
+void alliberaPaquet(Protocol p);
 
 #endif

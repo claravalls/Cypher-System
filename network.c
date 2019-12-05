@@ -10,8 +10,15 @@ void setSockfd(int fd){
 }
 
 void afegeixClient(int newsock, char* user, char *clientName){    
-    //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió
-    conn_clients = (Conn_cli*)realloc(conn_clients, sizeof(Conn_cli) * (qClients + 1));
+    if(qClients == 0){
+        //creem l'array on guardarem els clients que s'han connectat
+        conn_clients = (Conn_cli*) malloc (sizeof(Conn_cli));
+    }
+    else{
+        //ampliem l'espai de memòria de l'array i guardem els valors de la nova connexió
+        conn_clients = (Conn_cli*)realloc(conn_clients, sizeof(Conn_cli) * (qClients + 1));
+    }
+    
     conn_clients[qClients].sockfd = newsock;
     conn_clients[qClients].user = clientName;
     qClients++;
@@ -43,11 +50,7 @@ int connectServer(const char* ip, int port){
 
     listen (sockfd, 3);
 
-    //creem l'array on guardarem els clients que s'han connectat
-    conn_clients = (Conn_cli*) malloc (sizeof(Conn_cli));
     qClients = 0;
-    //creem l'array on guardarem els servidors als que ens hem connectat
-    conn_serv = (Conn_serv*) malloc (sizeof(Conn_serv));
     qServ = 0;
 
     return sockfd;
@@ -84,8 +87,15 @@ int connectClient(int port, char *ip, char *myUsername){
     //enviem el paquet de petició de connexió
     enviaPaquet(sockc, 0x01, "[TR_NAME]", strlen(myUsername), myUsername);
 
-    //afegim una nova connexió a l'array
-    conn_serv = (Conn_serv*)realloc(conn_serv, sizeof(Conn_serv) * (qServ + 1));
+    if(qServ == 0){
+        //creem l'array on guardarem els servidors als que ens hem connectat
+        conn_serv = (Conn_serv*) malloc (sizeof(Conn_serv));
+    }
+    else{
+        //afegim una nova connexió a l'array
+        conn_serv = (Conn_serv*)realloc(conn_serv, sizeof(Conn_serv) * (qServ + 1));
+    }
+    
     conn_serv[qServ].port = port;
     conn_serv[qServ].sockfd = sockc;
 
@@ -104,15 +114,17 @@ int connectClient(int port, char *ip, char *myUsername){
         sprintf (okMessage, OK_CONN, port, p.data);
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
+
+        alliberaPaquet(p);
         return 0;
     }
+
     return -1;
 }
 
 char * comprovaNomUsuari(char *port, int myPort){
     int p = atoi(port);         //variable amb el port 
     char *missatge;             //missatge que mostrarà pel terminal
-    missatge = (char *) malloc(strlen(port) + 2); //Pel \n que afegirem i el \0 que afegeix el strcpy
 
     //si és el meu servidor no el vull mostrar
     if(p == myPort){
@@ -120,6 +132,7 @@ char * comprovaNomUsuari(char *port, int myPort){
     }
     else{
         //posem el missatge a mostrar com al número del port
+        missatge = (char *) malloc(strlen(port) + 2); //Pel \n que afegirem i el \0 que afegeix el strcpy
         strcpy(missatge, port);     
         strcat(missatge, "\n");
 
@@ -145,33 +158,35 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 
     //creem el paquet a enviar
     p.type = type;
-    p.header = (char*) malloc(sizeof(char) * strlen(header));
-    p.header = header;
+    
+    p.header = (char*) malloc(strlen(header) + 1);
+    strcpy(p.header, header);
+    
     p.length = length;
 
+    p.data = (char*) malloc(sizeof(char));
+
     if(length !=  0){
-        p.data = (char*) malloc(sizeof(char) * length);
+        p.data = (char*) realloc(p.data, sizeof(char) * length + 1);
     }
-    else{
-        p.data = (char*) malloc(sizeof(char));
-    }
-    p.data = data;
+
+    strcpy(p.data, data);
 
     //enviem el paquet camp a camp
     write(fd, &p.type, 1);
     write(fd, p.header, strlen(p.header));
     write(fd, &p.length, 2);
     write(fd, p.data, strlen(p.data));
+
+    free(p.data);
+    free(p.header);
 }
 
 Protocol llegeixPaquet(int fd){
-    char type, *header, *data;      //variables on guardarem els camps del paquet
-    int length = 0;
-
     ssize_t nbytes;                 //guardarà el número de bytes que ha llegit
     Protocol p;
 
-    nbytes = read(fd, &type, 1);
+    nbytes = read(fd, &p.type, 1);
 
     //si no hem rebut cap missatge, retornarem un paquet amb data NULL
     if (nbytes == 0){
@@ -179,17 +194,12 @@ Protocol llegeixPaquet(int fd){
         return p;
     }
 
-    header = readUntil(fd, ']', ']');
+    p.header = readUntil(fd, ']', ']');
     
-    read(fd, &length, 2);
+    read(fd, &p.length, 2);
 
-    data = (char *) malloc(length + 1);
-    read(fd, data, length);
-
-    p.type = type;
-    p.header = header;
-    p.length = length;
-    p.data = data;
+    p.data = (char *) malloc(p.length + 1);
+    read(fd, p.data, p.length);
 
     return p;
 }
@@ -261,8 +271,8 @@ void eliminaConnexioCli(char *user){
     //busquem al client a l'array
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
-
             s = b + 1;
+            
             if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
                 for (int i = b; i < qClients; i++){
@@ -291,8 +301,8 @@ void eliminaConnexioServ(char *user){
     //busquem al client a l'array
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
-
             s = b + 1;
+            
             if(s < qServ){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
                 for (int i = b; i < qServ; i++){
@@ -314,4 +324,9 @@ void eliminaConnexioServ(char *user){
             break;
         }
     }
+}
+
+void alliberaPaquet(Protocol p){
+    free(p.header);
+    free(p.data);
 }

@@ -406,7 +406,6 @@ void buscaPorts(int pipe, int myPort){
             connexions[nConn] = (char*)malloc(strlen(missatge) + 1);
             
             strcpy(connexions[nConn], missatge);
-            
             nConn++;
         } 
 

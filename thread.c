@@ -33,13 +33,16 @@ static void *threadEscolta (void *config){
 
         //esperem el missatge del client que s'ha connectat
         p = llegeixPaquet(newsock);
-        clientName = p.data;
-        if (clientName == NULL){
+      
+        if (p.data == NULL){
             //És una connexió falsa. La tanquem
             close(newsock);
         }
         else {
+            clientName = (char*)malloc(strlen(p.data) + 1);
+            strcpy(clientName, p.data);
             afegeixClient(newsock, c->user, clientName);
+            alliberaPaquet(p);
         }
     }
     return (void *) c;
@@ -47,9 +50,6 @@ static void *threadEscolta (void *config){
 
 void apagaServidor(){
     apaga = 0;
-
-    free(tServ);
-    free(tCli);
 }
 
 static void *threadServ (void *servidor){
@@ -98,6 +98,8 @@ static void *threadServ (void *servidor){
                 //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
         }
+
+        alliberaPaquet(p);
     }
 
 
@@ -156,16 +158,22 @@ static void *threadCli (void *client){
                 }
                 break;
         }
+
+        alliberaPaquet(p);
     }
-
-
 
     pthread_mutex_destroy(&mtxC);
     return NULL;
 }
 
 void iniciaThreadServidor(Conn_serv* servidor, char *user){
-    tServ = (UserThread*)realloc(tServ, sizeof(UserThread)*(qTServ+1));
+    if(qTServ == 0){
+        tServ = (UserThread*)malloc(sizeof(UserThread));
+    }
+    else{
+        tServ = (UserThread*)realloc(tServ, sizeof(UserThread)*(qTServ+1));
+    }
+    
     tServ[qTServ].user = user;
     tServ[qTServ].listener = servidor->sockfd;
 
@@ -174,7 +182,13 @@ void iniciaThreadServidor(Conn_serv* servidor, char *user){
 }
 
 void iniciaThreadClient(Conn_cli* client, char *user){
-    tCli = (UserThread*)realloc(tCli, sizeof(UserThread)*(qTCli+1));
+    if(qTCli == 0){
+        tCli = (UserThread*)malloc(sizeof(UserThread));
+    }
+    else{
+        tCli = (UserThread*)realloc(tCli, sizeof(UserThread)*(qTCli+1));
+    }
+    
     tCli[qTCli].user = user;
     tCli[qTCli].listener = client->sockfd;
 
@@ -185,9 +199,7 @@ void iniciaThreadClient(Conn_cli* client, char *user){
 void iniciaThreadEscolta(Config* config){
     pthread_t t1;
     pthread_create(&t1, NULL, threadEscolta, config);
-
-    tServ = (UserThread*)malloc(sizeof(UserThread));
-    tCli = (UserThread*)malloc(sizeof(UserThread));
+    
     qTServ = 0;
     qTCli = 0;
 }
@@ -236,17 +248,22 @@ void shiftJoins(UserThread *tThread, char *user, int lenght){
     for (b = 0; b < lenght; b++){
         if(strcmp(user, tThread[b].user) == 0){
             s = b + 1;
-            //shiftem els valors a l'esquerra
-            for (int i = b; i < lenght; i++){
-                tThread[b] = tThread[s];
-                b++;
-                s++;
-            }
-            tThread = (UserThread *) realloc(tThread, sizeof(UserThread) * (lenght - 1));
 
+            if(s < lenght){
+                //shiftem els valors a l'esquerra
+                for (int i = b; i < lenght; i++){
+                    tThread[b] = tThread[s];
+                    b++;
+                    s++;
+                }
+            }
+            if(lenght == 1){ //es l'ultim client
+                free(tThread);
+            }
+            else{
+                //redimensionem la mida de l'array
+                tThread = (UserThread *) realloc(tThread, sizeof(UserThread) * (lenght - 1));
+            }
         }
     }
 }
-
-
-
