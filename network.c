@@ -9,7 +9,8 @@ void setSockfd(int fd){
     mySock = fd;
 }
 
-void afegeixClient(int newsock, char* user, char *clientName){    
+void afegeixClient(int newsock, char* user, char *clientName){  
+    char *aux;  
     if(qClients == 0){
         //creem l'array on guardarem els clients que s'han connectat
         conn_clients = (Conn_cli*) malloc (sizeof(Conn_cli));
@@ -26,6 +27,12 @@ void afegeixClient(int newsock, char* user, char *clientName){
 
     //notifiquem al client que la connexió ha funcionat
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
+
+    asprintf(&aux, NOU_CLIENT, clientName);
+    write(1, aux, strlen(aux));
+    free(aux);
+
+    imprimeixPrompt();
 
     //creem el thread del client
     iniciaThreadClient(&conn_clients[qClients - 1], user);
@@ -104,7 +111,8 @@ int connectClient(int port, char *ip, char *myUsername){
     
     if (p.data != NULL){
         //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
-        conn_serv[qServ].user = p.data; 
+        conn_serv[qServ].user = (char *) malloc(strlen(p.data) + 1);
+        strcpy(conn_serv[qServ].user, p.data); 
 
         iniciaThreadServidor(&conn_serv[qServ], myUsername);
         qServ++;
@@ -115,7 +123,7 @@ int connectClient(int port, char *ip, char *myUsername){
         write (1, okMessage, strlen(okMessage));
         free(okMessage);
 
-        alliberaPaquet(p);
+        alliberaPaquet(p); 
         return 0;
     }
 
@@ -141,7 +149,6 @@ char * comprovaNomUsuari(char *port, int myPort){
             
             //si ja està connectat, mostrarem el missatge amb el port i el nom d'usuari 
             if (conn_serv[i].port == p){
-                
                 //sobreescriurem el missatge a mostrar
                 missatge = (char *) realloc(missatge, strlen(CONN_WITH_NAME) + strlen(conn_serv[i].user) + 4); //+ 4 pel port
                 sprintf(missatge, CONN_WITH_NAME, p, conn_serv[i].user);
@@ -168,15 +175,19 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 
     if(length !=  0){
         p.data = (char*) realloc(p.data, sizeof(char) * length + 1);
-    }
-
-    strcpy(p.data, data);
+        strcpy(p.data, data);
+    }else{
+        p.data = NULL;
+    } 
 
     //enviem el paquet camp a camp
     write(fd, &p.type, 1);
     write(fd, p.header, strlen(p.header));
     write(fd, &p.length, 2);
-    write(fd, p.data, strlen(p.data));
+
+    if(length != 0){
+        write(fd, p.data, strlen(p.data));
+    }
 
     free(p.data);
     free(p.header);
@@ -199,7 +210,10 @@ Protocol llegeixPaquet(int fd){
     read(fd, &p.length, 2);
 
     p.data = (char *) malloc(p.length + 1);
-    read(fd, p.data, p.length);
+
+    if(p.length != 0){
+        read(fd, p.data, p.length);
+    }
 
     return p;
 }
@@ -231,7 +245,7 @@ void enviaMissatge(char *user, char *missatge){
     int sockfd = 0;
     //busquem a quin sockfd correspon el nom d'usuari
     for (int i = 0; i < qServ; i++){
-        if(strcmp(conn_serv[i].user, user) == 0){
+        if(strcasecmp(conn_serv[i].user, user) == 0){
             sockfd = conn_serv[i].sockfd;
             enviaPaquet(sockfd, 0x02, "[MSG]", strlen(missatge), missatge);
             break;
@@ -329,4 +343,58 @@ void eliminaConnexioServ(char *user){
 void alliberaPaquet(Protocol p){
     free(p.header);
     free(p.data);
+}
+
+void enviaShowAudios(char *user){
+    int sockfd = 0;
+    //busquem a quin sockfd correspon el nom d'usuari
+    for (int i = 0; i < qServ; i++){
+        if(strcasecmp(conn_serv[i].user, user) == 0){
+            sockfd = conn_serv[i].sockfd;
+            enviaPaquet(sockfd, 0x04, "[SHOW_AUDIOS]", 0, NULL);
+            break;
+        }
+    }
+    //comprovem si el nom d'usuari introduit és incorrecte
+    if(sockfd == 0){
+        write(1, ERR_USER, strlen(ERR_USER));
+    }
+}
+
+void enviaDownloadAudio(char *user, char *audio){
+    int sockfd = 0;
+    //busquem a quin sockfd correspon el nom d'usuari
+    for (int i = 0; i < qServ; i++){
+        if(strcasecmp(conn_serv[i].user, user) == 0){
+            sockfd = conn_serv[i].sockfd;
+            enviaPaquet(sockfd, 0x05, "[AUDIO_RQST]", strlen(audio), audio);
+            break;
+        }
+    }
+    //comprovem si el nom d'usuari introduit és incorrecte
+    if(sockfd == 0){
+        write(1, ERR_USER, strlen(ERR_USER));
+    }
+}
+
+void enviaAudio(char* path, char *audioName, int sockfd){
+    int f = open(path, O_RDONLY);
+
+    if(f < 0){
+        printf("No es pot obrir\n");
+    }
+    else{
+        size_t nbytes;
+        char *data = (char *)malloc(512);
+
+        nbytes = read(f, &data, 512);
+        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audioName), audioName); //change in the future (audioName per path)
+
+        while(nbytes > 0){
+            write(sockfd, data, 512);
+            nbytes = read(f, &data, 512);
+        }
+
+        enviaPaquet(sockfd, 0x05, "[EOF]", 512, "");
+    }
 }

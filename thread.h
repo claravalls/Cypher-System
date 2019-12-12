@@ -1,6 +1,8 @@
 #ifndef _THREAD_H_
 #define _THREAD_H_
 
+#define _GNU_SOURCE 1
+
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>

@@ -431,3 +431,57 @@ void buscaPorts(int pipe, int myPort){
     }
     free(connexions);
 }
+
+char * buscaAudios(){
+    char * llista;
+    
+    asprintf(&llista, SHOWAUDIOS, config.user, config.dirAudios);
+
+    //busquem arxius al directori  
+    struct dirent **arxius;
+    char * path;
+    asprintf(&path, "./%s", config.dirAudios);
+    int q_arxius = scandir (path, &arxius, NULL, alphasort);
+    free(path);
+
+    if (arxius == NULL)
+        write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
+    
+    while (q_arxius--)
+    {
+        if ((strcmp (arxius[q_arxius]->d_name, ".") != 0) && (strcmp (arxius[q_arxius]->d_name, "..") != 0)){
+            asprintf(&llista, "%s%s\n", llista, arxius[q_arxius]->d_name);
+            free (arxius[q_arxius]);
+        }
+    }
+    free (arxius); 
+    //strcat(llista, "\0");
+
+    return llista; 
+}
+
+void buscaDownload(char * audio, int sockfd){
+    //busquem arxius al directori  
+    struct dirent **arxius;
+    char * path;
+    char * aux; 
+    asprintf(&path, "./%s", config.dirAudios);
+    int q_arxius = scandir (path, &arxius, NULL, alphasort);
+    free(path);
+
+    if (arxius == NULL)
+        write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
+    
+    while (q_arxius--)
+    {
+        if (strcmp (arxius[q_arxius]->d_name, audio) == 0){
+            asprintf(&aux, "%s/%s", path, arxius[q_arxius]->d_name);
+            enviaAudio(aux, arxius[q_arxius]->d_name, sockfd);
+            free(aux);
+        }
+ 
+        free(arxius[q_arxius]);
+        
+    }
+    free (arxius);  
+}

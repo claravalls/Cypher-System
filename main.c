@@ -74,11 +74,11 @@ int main(int argc, const char* argv[]){
             break;  
 
             case SHOW_AUDIOS:
-                optionShowA();
+                optionShowA(valors[1]);
             break;
 
             case DOWNLOAD:
-                optionDownload();
+                optionDownload(valors[1], valors[2]);
             break;
 
             case EXIT:

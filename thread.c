@@ -57,7 +57,8 @@ static void *threadServ (void *servidor){
     Conn_serv *c;
     Protocol p;                             //protocol de comunicació
     char connectatS = 1;                     //variable que indica quan aturar el thread
-    
+    int audioFile;
+
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
     strcpy(c->user, aux->user);
@@ -73,25 +74,25 @@ static void *threadServ (void *servidor){
             case 0x03:
                 break;
 
-            case 0x04:
+            case 0x04:                
+                if(strcmp(p.header, "[LIST_AUDIOS]") == 0){
+                    write(1, p.data, strlen(p.data));
+                    imprimeixPrompt();
+                }
                 break;
 
             case 0x05:
-                if(strcmp(p.header, "[AUDIO_RQST]") == 0){
-                    //solicitud audio
-                    
-                    //agafem audio a descarregar
-                    enviaPaquet(c->sockfd, 0x05, "[AUDIO_RSPNS]", 0, "");
+                if(strcmp(p.header, "[AUDIO_RSPNS]") == 0){
+                    audioFile = open(p.data, O_APPEND);
+                    write(audioFile, "Si que funciona", 16); 
+                    close(audioFile);             
 
+                }else if(strcmp(p.header, "[AUDIO_KO]") == 0){
+                    //no existeix l'audio 
+                    write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
 
-                }else if(strcmp(p.header, "[MD5OK]") == 0){
-                    //Comprovació MD5SUM correcta
-                    connectatS = 0;
-                    close(c->sockfd);
-                    free(c->user);
-                    free(c);
-                }else if(strcmp(p.header, "[MD5KO]") == 0){
-                    //Comprovació MD5SUM incorrecta
+                }else if(strcmp(p.header, "[EOF]") == 0){
+                    //Final de la transmissio de dades
 
                 }
                 break;
@@ -130,6 +131,8 @@ static void *threadCli (void *client){
     Conn_cli *c;                            //informació del client que s'ha connectat
     Protocol p;                             //protocol de comunicació
     char connectatC = 1;                    //variable que indica quan aturar el thread
+    char *audiosShow;
+    char *missatge;
 
     c = (Conn_cli*)malloc(sizeof(Conn_cli));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
@@ -140,6 +143,7 @@ static void *threadCli (void *client){
         //escoltem si el client ens envia un missatge
 
         p = llegeixPaquet(c->sockfd);
+
         switch(p.type){
             case 0x02:
                 if(strcmp(p.header, "[MSG]") == 0){
@@ -152,19 +156,22 @@ static void *threadCli (void *client){
                 break;
 
             case 0x04:
+                if(strcmp(p.header, "[SHOW_AUDIOS]") == 0){
+                    audiosShow = buscaAudios();
+                    enviaPaquet(c->sockfd, 0x04, "[LIST_AUDIOS]", strlen(audiosShow), audiosShow);
+                }
                 break;
 
             case 0x05:
-                if(strcmp(p.header, "[AUDIO_RSPNS]") == 0){
-                    //enviar dades del fitxer d'audio
-                    
+                if(strcmp(p.header, "[AUDIO_RQST]") == 0){
+                    //solicitud audio
+                    buscaDownload(p.data, c->sockfd);
 
-                }else if(strcmp(p.header, "[AUDIO_KO]") == 0){
-                    //no existeix l'audio 
-                    write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
-
-                }else if(strcmp(p.header, "[EOF]") == 0){
-                    //Final de la transmissio de dades
+                }else if(strcmp(p.header, "[MD5OK]") == 0){
+                    //Comprovació MD5SUM correcta
+                   
+                }else if(strcmp(p.header, "[MD5KO]") == 0){
+                    //Comprovació MD5SUM incorrecta
 
                 }
                 break;
@@ -181,6 +188,12 @@ static void *threadCli (void *client){
                 }
                 else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatC = 0;
+                    asprintf(&missatge, ADEU_CLIENT, c->user);
+                    write(1, missatge, strlen(missatge));
+                    free(missatge);
+
+                    imprimeixPrompt();
+
                     close(c->sockfd);
                     free(c->user);
                     free(c);

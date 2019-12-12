@@ -64,16 +64,16 @@ void optionShowC(char ** sysports, int myPort){
     }
 }
 
-void optionShowA(){
-
+void optionShowA(char * username){
+    enviaShowAudios(username);
 }
 
 void optionBroadcast(){
 
 }
 
-void optionDownload(){
-
+void optionDownload(char *user, char *audio){
+    enviaDownloadAudio(user, audio);
 }
 
 void stopAll(){

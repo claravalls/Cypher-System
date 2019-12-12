@@ -2,6 +2,9 @@
 #define _MANAGER_H_
 
 //Llibreries del sistema
+
+#define _GNU_SOURCE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -9,6 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include "logica.h"
 #include "network.h"
@@ -16,6 +20,8 @@
 #define ERR_FILE "Error opening file...\n"
 #define CONN_AVAIL "%d connections available\n"
 #define PROMPT "\n$%s: "
+#define SHOWAUDIOS "\n[%s] %s\n"
+#define ERR_AUDIOS "Error. Audio file inexistent\n"
 
 /***********************************************
 * @Finalitat:   retornar el valor de la configuració llegida al fitxer
@@ -87,5 +93,9 @@ char* readUntil(int fd, char end, char lastChar);
 * @Retorn:      ---
 ************************************************/
 void buscaPorts(int pipe, int myPort);
+
+char * buscaAudios();
+
+void buscaDownload(char * audio, int sockfd);
 
 #endif

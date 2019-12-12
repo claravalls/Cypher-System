@@ -1,6 +1,7 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 
+#define _GNU_SOURCE 1
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -25,6 +26,9 @@
 #define MESSAGE "\n[%s]: %s\n"
 #define ERR_USER "This user does not exists\n"
 #define CONN_WITH_NAME "\n%d %s\n"
+#define NOU_CLIENT "New connection. User: %s\n"
+#define ADEU_CLIENT "Client %s has disconnected\n"
+
 
 typedef struct{
     unsigned char type;
@@ -134,5 +138,11 @@ void eliminaConnexioServ(char *user);
 void tancaConnexions();
 
 void alliberaPaquet(Protocol p);
+
+void enviaShowAudios(char *user);
+
+void enviaDownloadAudio(char *user, char *audio);
+
+void enviaAudio(char *path, char *audioName, int sockfd);
 
 #endif
