@@ -77,6 +77,23 @@ static void *threadServ (void *servidor){
                 break;
 
             case 0x05:
+                if(strcmp(p.header, "[AUDIO_RQST]") == 0){
+                    //solicitud audio
+                    
+                    //agafem audio a descarregar
+                    enviaPaquet(c->sockfd, 0x05, "[AUDIO_RSPNS]", 0, "");
+
+
+                }else if(strcmp(p.header, "[MD5OK]") == 0){
+                    //Comprovació MD5SUM correcta
+                    connectatS = 0;
+                    close(c->sockfd);
+                    free(c->user);
+                    free(c);
+                }else if(strcmp(p.header, "[MD5KO]") == 0){
+                    //Comprovació MD5SUM incorrecta
+
+                }
                 break;
 
             case 0x06:
@@ -138,6 +155,18 @@ static void *threadCli (void *client){
                 break;
 
             case 0x05:
+                if(strcmp(p.header, "[AUDIO_RSPNS]") == 0){
+                    //enviar dades del fitxer d'audio
+                    
+
+                }else if(strcmp(p.header, "[AUDIO_KO]") == 0){
+                    //no existeix l'audio 
+                    write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
+
+                }else if(strcmp(p.header, "[EOF]") == 0){
+                    //Final de la transmissio de dades
+
+                }
                 break;
 
             case 0x06:
