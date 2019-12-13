@@ -55,9 +55,11 @@ void apagaServidor(){
 static void *threadServ (void *servidor){
     Conn_serv *aux = (Conn_serv *) servidor;   //informació del client que s'ha connectat
     Conn_serv *c;
-    Protocol p;                             //protocol de comunicació
+    Protocol p;                               //protocol de comunicació
     char connectatS = 1;                     //variable que indica quan aturar el thread
     int audioFile;
+    char primer = 1;
+    int i = 0; //la borrarem
 
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
@@ -67,6 +69,7 @@ static void *threadServ (void *servidor){
     while (connectatS){
         //escoltem si el servidor ens envia un missatge
         p = llegeixPaquet(c->sockfd);
+            
         switch(p.type){
             case 0x02:
                 break;
@@ -83,16 +86,27 @@ static void *threadServ (void *servidor){
 
             case 0x05:
                 if(strcmp(p.header, "[AUDIO_RSPNS]") == 0){
-                    audioFile = open(p.data, O_APPEND);
-                    write(audioFile, "Si que funciona", 16); 
-                    close(audioFile);             
+                    if(primer){
+                        audioFile = open(p.data, O_WRONLY | O_APPEND | O_CREAT, 0644);
+                        primer = 0;
+                    }
+                    else{
+                        i++;
+                        printf("Escrit el %d paquet\n", i);
+                        write(audioFile, p.data, p.length);
+                    }
 
-                }else if(strcmp(p.header, "[AUDIO_KO]") == 0){
+                }
+                else if(strcmp(p.header, "[EOF]") == 0){
+                    //Final de la transmissio de dades  
+                    primer = 1;
+                    printf("Final transmissio\n");                    
+                    close(audioFile);
+                }
+                
+                else if(strcmp(p.header, "[AUDIO_KO]") == 0){
                     //no existeix l'audio 
                     write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
-
-                }else if(strcmp(p.header, "[EOF]") == 0){
-                    //Final de la transmissio de dades
 
                 }
                 break;

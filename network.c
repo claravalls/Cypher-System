@@ -174,11 +174,10 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     p.data = (char*) malloc(sizeof(char));
 
     if(length !=  0){
-        p.data = (char*) realloc(p.data, sizeof(char) * length + 1);
+        //p.data = (char*) malloc(sizeof(char) * (length + 1));
+        p.data = (char*) realloc(p.data, length + 1);
         strcpy(p.data, data);
-    }else{
-        p.data = NULL;
-    } 
+    }
 
     //enviem el paquet camp a camp
     write(fd, &p.type, 1);
@@ -187,9 +186,9 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
 
     if(length != 0){
         write(fd, p.data, strlen(p.data));
+        free(p.data);
     }
 
-    free(p.data);
     free(p.header);
 }
 
@@ -209,7 +208,7 @@ Protocol llegeixPaquet(int fd){
     
     read(fd, &p.length, 2);
 
-    p.data = (char *) malloc(p.length + 1);
+    p.data = (char *) malloc(p.length);
 
     if(p.length != 0){
         read(fd, p.data, p.length);
@@ -379,22 +378,29 @@ void enviaDownloadAudio(char *user, char *audio){
 
 void enviaAudio(char* path, char *audioName, int sockfd){
     int f = open(path, O_RDONLY);
+    int i = 0;
+    char *audio;
 
     if(f < 0){
-        printf("No es pot obrir\n");
+        printf("No es pot obrir %s\n", path);
     }
     else{
         size_t nbytes;
-        char *data = (char *)malloc(512);
+        asprintf(&audio, "./%s", audioName);
+        char *data = (char *)malloc(sizeof(char) * 512);
 
-        nbytes = read(f, &data, 512);
-        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audioName), audioName); //change in the future (audioName per path)
-
+        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
+        nbytes = read(f, data, 512);
+        
         while(nbytes > 0){
-            write(sockfd, data, 512);
-            nbytes = read(f, &data, 512);
+            i++;
+            printf("Envio el paquet %d\n", i);
+            enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(data), data);
+            nbytes = read(f, data, 512);
         }
 
-        enviaPaquet(sockfd, 0x05, "[EOF]", 512, "");
+        printf("Envio EOF\n");
+
+        enviaPaquet(sockfd, 0x05, "[EOF]", 0, NULL);
     }
 }
