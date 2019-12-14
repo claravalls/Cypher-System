@@ -58,8 +58,7 @@ static void *threadServ (void *servidor){
     Protocol p;                               //protocol de comunicació
     char connectatS = 1;                     //variable que indica quan aturar el thread
     int audioFile;
-    char primer = 1;
-    int i = 0; //la borrarem
+    char primer = 1, *cadena, *audioName;
 
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
@@ -89,25 +88,31 @@ static void *threadServ (void *servidor){
                     if(primer){
                         audioFile = open(p.data, O_WRONLY | O_APPEND | O_CREAT, 0644);
                         primer = 0;
+                        asprintf(&audioName, "%s", p.data); //p.data sera ./nomAudio
+
+                        strcpy(&audioName[0], &audioName[1]); //traiem el . de la cadena
+                        strcpy(&audioName[1], &audioName[2]); //traiem el / de la cadena
                     }
                     else{
-                        i++;
-                        printf("Escrit el %d paquet\n", i);
                         write(audioFile, p.data, p.length);
                     }
 
                 }
                 else if(strcmp(p.header, "[EOF]") == 0){
                     //Final de la transmissio de dades  
+                    asprintf(&cadena, TRANS_END, c->user, audioName);
+                    write(1, cadena, strlen(cadena));
+                    free(cadena);
+                    free(audioName);
+
                     primer = 1;
-                    printf("Final transmissio\n");                    
                     close(audioFile);
+                    imprimeixPrompt();
                 }
                 
                 else if(strcmp(p.header, "[AUDIO_KO]") == 0){
                     //no existeix l'audio 
                     write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
-
                 }
                 break;
 
@@ -127,13 +132,10 @@ static void *threadServ (void *servidor){
                     free(c->user);
                     free(c);
                 }
-                //No llegirem aquí perquè sino no estarà sincronitzat
                 break;
         }
-
         alliberaPaquet(p);
     }
-
 
     pthread_mutex_destroy(&mtxS);
 

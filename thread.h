@@ -16,6 +16,8 @@
 
 #include "network.h"
 #include "logica.h"
+
+#define TRANS_END "\n[%s] %s downloaded"
  
 typedef struct {
     int port;
