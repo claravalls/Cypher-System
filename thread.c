@@ -91,7 +91,8 @@ static void *threadServ (void *servidor){
                         asprintf(&audioName, "%s", p.data); //p.data sera ./nomAudio
 
                         strcpy(&audioName[0], &audioName[1]); //traiem el . de la cadena
-                        strcpy(&audioName[1], &audioName[2]); //traiem el / de la cadena
+                        strcpy(&audioName[0], &audioName[1]); //traiem el / de la cadena
+                        write(1, DOWNLOADING, strlen(DOWNLOADING));
                     }
                     else{
                         write(audioFile, p.data, p.length);
