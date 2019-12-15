@@ -212,6 +212,10 @@ char llegeixComanda(char *comanda){
         opcio = 7;
         sizeofc = 0;
     }
+    else{
+        sizeofc = -1;
+        opcio = 0;
+    }
     
     return opcio;
 }
@@ -485,7 +489,7 @@ void buscaDownload(char * audio, int sockfd){
     }
     if(noTrobat)
         enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
-        
+
     free (arxius);  
 }
 
