@@ -58,7 +58,7 @@ static void *threadServ (void *servidor){
     Protocol p;                               //protocol de comunicació
     char connectatS = 1;                     //variable que indica quan aturar el thread
     int audioFile;
-    char primer = 1, *cadena, *audioName;
+    char primer = 1, *cadena, *audioName, *checksum, *path;
 
     c = (Conn_serv*)malloc(sizeof(Conn_serv));
     c->user = (char*)malloc(sizeof(char)*strlen(aux->user) + 1);
@@ -86,7 +86,7 @@ static void *threadServ (void *servidor){
             case 0x05:
                 if(strcmp(p.header, "[AUDIO_RSPNS]") == 0){
                     if(primer){
-                        audioFile = open(p.data, O_WRONLY | O_APPEND | O_CREAT, 0644);
+                        audioFile = open(p.data, O_WRONLY | O_CREAT | O_TRUNC, 0777);
                         primer = 0;
                         asprintf(&audioName, "%s", p.data); //p.data sera ./nomAudio
 
@@ -96,14 +96,32 @@ static void *threadServ (void *servidor){
                     }
                     else{
                         write(audioFile, p.data, p.length);
+                        asprintf(&path, "./%s", audioName);
+                        checksum = calculaChecksum(path);
+                        printf("checksum: %s\n", checksum);
+                        free(checksum);
                     }
 
                 }
                 else if(strcmp(p.header, "[EOF]") == 0){
-                    //Final de la transmissio de dades  
-                    asprintf(&cadena, TRANS_END, c->user, audioName);
-                    write(1, cadena, strlen(cadena));
-                    free(cadena);
+                    asprintf(&path, "./%s", audioName);
+                    checksum = calculaChecksum(path);
+                    printf("checksum: %s\n", checksum);
+
+                    if(strcmp(checksum, p.data) == 0){
+                        enviaPaquet(c->sockfd, 0x05, "[MD5OK]", 0, NULL);
+                        //Final de la transmissio de dades  
+                        asprintf(&cadena, TRANS_END, c->user, audioName);
+                        write(1, cadena, strlen(cadena));
+                        free(cadena);
+                    }
+                    else{
+                         enviaPaquet(c->sockfd, 0x05, "[MD5KO]", 0, NULL);
+                         write(1, MD5KO, strlen(MD5KO));
+                    }
+                    
+                    free(path);
+                    free(checksum);
                     free(audioName);
 
                     primer = 1;
@@ -113,7 +131,8 @@ static void *threadServ (void *servidor){
                 
                 else if(strcmp(p.header, "[AUDIO_KO]") == 0){
                     //no existeix l'audio 
-                    write(1, "Audio inexistent\n",strlen("Audio inexistent\n"));
+                    write(1, AUDIOKO ,strlen(AUDIOKO));
+                    imprimeixPrompt();
                 }
                 break;
 
@@ -185,11 +204,12 @@ static void *threadCli (void *client){
                     buscaDownload(p.data, c->sockfd);
 
                 }else if(strcmp(p.header, "[MD5OK]") == 0){
-                    //Comprovació MD5SUM correcta
+                    write(1, MD5OK, strlen(MD5OK));
+                    imprimeixPrompt();
                    
                 }else if(strcmp(p.header, "[MD5KO]") == 0){
-                    //Comprovació MD5SUM incorrecta
-
+                    write(1, MD5KO, strlen(MD5KO));
+                    imprimeixPrompt();
                 }
                 break;
 

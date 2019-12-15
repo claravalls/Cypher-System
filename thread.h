@@ -19,6 +19,9 @@
 
 #define TRANS_END "\n[%s] %s downloaded"
 #define DOWNLOADING "\nDownloading...\n"
+#define MD5OK "Audio correctly sent\n"
+#define MD5KO "Audio checksum doesn't match\n"
+#define AUDIOKO "This file does not exists\n"
  
 typedef struct {
     int port;

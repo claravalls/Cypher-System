@@ -478,11 +478,44 @@ void buscaDownload(char * audio, int sockfd){
             enviaAudio(aux, arxius[q_arxius]->d_name, sockfd);
             free(aux);
             free(path);
-
         }
  
         free(arxius[q_arxius]);
         
     }
     free (arxius);  
+}
+
+char * calculaChecksum (char *path){
+    char *checksum;
+    int fd[2];
+    char * argv[3] = {"md5sum", path, NULL};
+
+    if (pipe(fd) == -1){
+            write(1, ERR_PIPE, strlen (ERR_PIPE));
+            exit(-1);
+    }
+    
+    pid_t pid = fork ();
+    switch (pid){
+        case 0: //fill
+            close(fd[0]);
+            dup2(fd[1], 1);
+
+            //executem md5sum
+            execvp(argv[0], argv);
+            break;
+        case -1:
+            write(1, ERR_CONN, strlen(ERR_CONN));
+            break;
+        default: //pare
+            close(fd[1]);
+            //esperem que acabi d'escriure
+            wait(NULL);
+            //llegim del checksum i enviem 
+            checksum = readUntil(fd[0], ' ', '\0');
+            close(fd[0]);
+            break;
+    }
+    return checksum;
 }

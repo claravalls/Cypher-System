@@ -98,4 +98,6 @@ char * buscaAudios();
 
 void buscaDownload(char * audio, int sockfd);
 
+char * calculaChecksum (char *path);
+
 #endif

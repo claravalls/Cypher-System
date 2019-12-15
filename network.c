@@ -379,15 +379,15 @@ void enviaDownloadAudio(char *user, char *audio){
 void enviaAudio(char* path, char *audioName, int sockfd){
     int f = open(path, O_RDONLY);
     int q = 0;
-    char *audio, c;
+    char *audio, c, *checksum;
 
     if(f < 0){
-        printf("No es pot obrir %s\n", path);
+        enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
     }
+
     else{
         size_t nbytes;
         asprintf(&audio, "./%s", audioName);
-        //char *data = (char *)malloc(sizeof(char) * 512);
 
         enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
         
@@ -403,9 +403,17 @@ void enviaAudio(char* path, char *audioName, int sockfd){
             }
             //envio
             enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
+            
+            checksum = calculaChecksum(path);
+            printf("checksum: %s\n", checksum);
+            free(checksum);
+                    
             free(data);
         }while(nbytes > 0);
 
-        enviaPaquet(sockfd, 0x05, "[EOF]", 0, NULL);
+        checksum = calculaChecksum(path);
+        printf("checksum: %s\n", checksum);
+        enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
+        free(checksum);
     }
 }
