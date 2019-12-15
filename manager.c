@@ -235,117 +235,18 @@ Config lecturaFitxer(const char *fitxer){
 		config.user = NULL;
 	}
 
-	nbytes = read(f, &cadena, 1);
+    config.user = readUntil(f, '\n', '\0');
+    config.dirAudios = readUntil(f, '\n', '\0');
+    config.ip = readUntil(f, '\n', '\0');
 
-	while (nbytes > 0)
-	{
-		//User
-		i = 0;
-		config.user = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-            config.user[i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.user = (char *)realloc(config.user, sizeof(char) * (i + 1));
-		}
-		config.user[i] = '\0';
+    aux = readUntil(f, '\n', '\0'); 
+    config.port = atoi(aux);
+    free(aux);
 
-		//DirAudios
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-		config.dirAudios = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-			config.dirAudios[i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.dirAudios = (char *)realloc(config.dirAudios, sizeof(char) * (i + 1));
-		}
-		config.dirAudios[i] = '\0';
-
-		//IP
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-		config.ip = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-			config.ip[i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.ip = (char *)realloc(config.ip, sizeof(char) * (i + 1));
-		}
-		config.ip[i] = '\0';
-
-		//Port
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-		aux = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-			aux[i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			aux = (char *)realloc(aux, sizeof(char) * (i + 1));
-		}
-		aux[i] = '\0';
-
-        //convertim el valor a enter
-		config.port = atoi(aux);
-        free(aux);
-
-		//ipWeb
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-		config.ipWeb = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-			config.ipWeb[i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.ipWeb = (char *)realloc(config.ipWeb, sizeof(char) * (i + 1));
-		}
-		config.ipWeb[i] = '\0';
-
-		//Sysport Begin
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-		config.sysports = (char **)malloc(sizeof(char*) * 2);
-
-        config.sysports[0] = (char *)malloc(sizeof(char));
-		while (cadena != '\n')
-		{
-			config.sysports[0][i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.sysports[0] = (char *)realloc(config.sysports[0], sizeof(char) * (i + 1));
-		}
-        config.sysports[0][i] = '\0';
-
-		//Sysport End
-		nbytes = read(f, &cadena, 1);
-
-		i = 0;
-
-        config.sysports[1] = (char *)malloc(sizeof(char));
-		while (cadena != '\n' && nbytes > 0)
-		{
-			config.sysports[1][i] = cadena;
-			i++;
-			nbytes = read(f, &cadena, 1);
-			config.sysports[1] = (char *)realloc(config.sysports[1], sizeof(char) * (i + 1));
-		}
-        config.sysports[1][i] = '\0';        
-
-        if (nbytes != 0) {
-            nbytes = read(f, &cadena, 1);
-        }
-	}
+    config.ipWeb = readUntil(f, '\n', '\0');
+    config.sysports = (char **)malloc(sizeof(char*) * 2);
+    config.sysports[0] = readUntil(f, '\n', '\0');
+    config.sysports[1] = readUntil(f, '\n', '\0');       
 
 	close(f);
     return config;
