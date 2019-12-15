@@ -212,6 +212,10 @@ char llegeixComanda(char *comanda){
         opcio = 7;
         sizeofc = 0;
     }
+    else{
+        sizeofc = -1;
+        opcio = 0;
+    }
     
     return opcio;
 }
@@ -463,11 +467,9 @@ char * buscaAudios(){
 void buscaDownload(char * audio, int sockfd){
     //busquem arxius al directori  
     struct dirent **arxius;
-    char * path;
-    char * aux; 
+    char *path, *aux, noTrobat = 1; 
     asprintf(&path, "./%s", config.dirAudios);
     int q_arxius = scandir (path, &arxius, NULL, alphasort);
-    int trobat = 0;
 
     if (arxius == NULL)
         write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
@@ -475,17 +477,50 @@ void buscaDownload(char * audio, int sockfd){
     while (q_arxius--)
     {
         if (strcmp (arxius[q_arxius]->d_name, audio) == 0){
+            noTrobat = 0;
             asprintf(&aux, "%s/%s", path, arxius[q_arxius]->d_name);
             enviaAudio(aux, arxius[q_arxius]->d_name, sockfd);
             free(aux);
             free(path);
-            trobat = 1;
         }
         free(arxius[q_arxius]);
     }
-    if (!trobat)
-    {
-    	enviaAudio(aux, ERR_AUDIOS, sockfd);
-    }
+    if(noTrobat)
+        enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
+
     free (arxius);  
+}
+
+char * calculaChecksum (char *path){
+    char *checksum;
+    int fd[2];
+    char * argv[3] = {"md5sum", path, NULL};
+
+    if (pipe(fd) == -1){
+            write(1, ERR_PIPE, strlen (ERR_PIPE));
+            exit(-1);
+    }
+    
+    pid_t pid = fork ();
+    switch (pid){
+        case 0: //fill
+            close(fd[0]);
+            dup2(fd[1], 1);
+
+            //executem md5sum
+            execvp(argv[0], argv);
+            break;
+        case -1:
+            write(1, ERR_CONN, strlen(ERR_CONN));
+            break;
+        default: //pare
+            close(fd[1]);
+            //esperem que acabi d'escriure
+            wait(NULL);
+            //llegim del checksum i enviem 
+            checksum = readUntil(fd[0], ' ', '\0');
+            close(fd[0]);
+            break;
+    }
+    return checksum;
 }

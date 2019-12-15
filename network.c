@@ -161,35 +161,14 @@ char * comprovaNomUsuari(char *port, int myPort){
 }
 
 void enviaPaquet(int fd, char type, char* header, int length, char* data){
-    Protocol p;
-
-    //creem el paquet a enviar
-    p.type = type;
-    
-    p.header = (char*) malloc(strlen(header) + 1);
-    strcpy(p.header, header);
-    
-    p.length = length;
-
-    p.data = (char*) malloc(sizeof(char));
-
-    if(length !=  0){
-        //p.data = (char*) malloc(sizeof(char) * (length + 1));
-        p.data = (char*) realloc(p.data, length);
-        strncpy(p.data, data, length);
-    }
-
     //enviem el paquet camp a camp
-    write(fd, &p.type, 1);
-    write(fd, p.header, strlen(p.header));
-    write(fd, &p.length, 2);
+    write(fd, &type, 1);
+    write(fd, header, strlen(header));
+    write(fd, &length, 2);
 
     if(length != 0){
-        write(fd, p.data, length);
-        free(p.data);
+        write(fd, data, length);
     }
-
-    free(p.header);
 }
 
 Protocol llegeixPaquet(int fd){
@@ -379,42 +358,35 @@ void enviaDownloadAudio(char *user, char *audio){
 void enviaAudio(char* path, char *audioName, int sockfd){
     int f = open(path, O_RDONLY);
     int q = 0;
-    char *audio, c;
+    char *audio, c, *checksum;
 
-    if (strcmp(audioName, ERR_AUDIOS) == 0)
-    {
-    	char *data = (char *)malloc(sizeof(char) * (strlen(ERR_AUDIOS)));
-    	strcpy(data, ERR_AUDIOS);
-    	enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", q, data);
-    	free(data);
-    }else{
-	    if(f < 0){
-	        printf("No es pot obrir %s\n", path);
-	    }
-	    else{
-	        size_t nbytes;
-	        asprintf(&audio, "./%s", audioName);
-	        //char *data = (char *)malloc(sizeof(char) * 512);
 
-	        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
-	        
-	        do{
-	            char *data = (char *)malloc(sizeof(char) * 512);
-	            //llegeixo 512 bytes
-	            for (q = 0; q < 512; q++)
-	            {
-	                nbytes = read(f, &c, 1);
-	                if(nbytes <= 0) break;
-	                //data = (char *)realloc(data, q + 1);
-	                data[q] = c;
-	            }
-	            //envio
-	            enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
+    if(f < 0){
+        enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
+    }
 
-	            free(data);
-	        }while(nbytes > 0);
+    else{
+        size_t nbytes;
+        //envio nom de l'audio a crear
+        asprintf(&audio, "./%s", audioName);
+        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
+        
+        do{ 
+            char *data = (char *)malloc(sizeof(char) * 512);
+            //llegeixo 512 bytes
+            for (q = 0; q < 512; q++)
+            {
+                nbytes = read(f, &c, 1);
+                if(nbytes <= 0) break;
+                data[q] = c;
+            }
+            //envio
+            enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
+            free(data);
+        }while(nbytes > 0);
 
-	        enviaPaquet(sockfd, 0x05, "[EOF]", 0, NULL);
-	    }
-	}
+        checksum = calculaChecksum(path);
+        enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
+        free(checksum);
+    }
 }
