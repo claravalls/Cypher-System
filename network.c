@@ -161,7 +161,7 @@ char * comprovaNomUsuari(char *port, int myPort){
 }
 
 void enviaPaquet(int fd, char type, char* header, int length, char* data){
-    Protocol p;
+    /*Protocol p;
 
     //creem el paquet a enviar
     p.type = type;
@@ -178,18 +178,15 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
         p.data = (char*) realloc(p.data, length);
         strncpy(p.data, data, length);
     }
-
+*/
     //enviem el paquet camp a camp
-    write(fd, &p.type, 1);
-    write(fd, p.header, strlen(p.header));
-    write(fd, &p.length, 2);
+    write(fd, &type, 1);
+    write(fd, header, strlen(header));
+    write(fd, &length, 2);
 
     if(length != 0){
-        write(fd, p.data, length);
-        free(p.data);
+        write(fd, data, length);
     }
-
-    free(p.header);
 }
 
 Protocol llegeixPaquet(int fd){
@@ -387,32 +384,25 @@ void enviaAudio(char* path, char *audioName, int sockfd){
 
     else{
         size_t nbytes;
+        //envio nom de l'audio a crear
         asprintf(&audio, "./%s", audioName);
-
         enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
         
-        do{
+        do{ 
             char *data = (char *)malloc(sizeof(char) * 512);
             //llegeixo 512 bytes
             for (q = 0; q < 512; q++)
             {
                 nbytes = read(f, &c, 1);
                 if(nbytes <= 0) break;
-                //data = (char *)realloc(data, q + 1);
                 data[q] = c;
             }
             //envio
             enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
-            
-            checksum = calculaChecksum(path);
-            printf("checksum: %s\n", checksum);
-            free(checksum);
-                    
             free(data);
         }while(nbytes > 0);
 
         checksum = calculaChecksum(path);
-        printf("checksum: %s\n", checksum);
         enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
         free(checksum);
     }
