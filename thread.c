@@ -195,6 +195,7 @@ static void *threadCli (void *client){
                 if(strcmp(p.header, "[SHOW_AUDIOS]") == 0){
                     audiosShow = buscaAudios();
                     enviaPaquet(c->sockfd, 0x04, "[LIST_AUDIOS]", strlen(audiosShow), audiosShow);
+                    free(audiosShow);
                 }
                 break;
 

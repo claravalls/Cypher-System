@@ -26,11 +26,12 @@ void optionSay(char ** comanda){
     enviaMissatge(comanda[1], comanda[2]);
 }
 
-void optionShowC(char ** sysports, int myPort){
+void optionShowC(char ** sysports, int myPort, char *ip){
     int fd[2];          //variable que farà de pipe
 
+    printf("IP: %s\n",ip);
     //creem els arguments a passar-li al procés show_connections.sh
-    char * argv[4] = {"./show_connections.sh", sysports[0], sysports[1], NULL};
+    char * argv[5] = {"./show_connections_v2.sh", sysports[0], sysports[1], ip, NULL};
 	
     write(1, TESTING, strlen(TESTING));
 
@@ -79,5 +80,5 @@ void optionDownload(char *user, char *audio){
 void stopAll(){
 	write(1,"\n", strlen("\n"));
     optionExit();
-    kill(getpid(), SIGINT);
+    int kill = raise(SIGINT);
 }

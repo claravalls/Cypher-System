@@ -73,7 +73,7 @@ void optionSay(char ** comanda);
                 myPort: valor del port del propi servidor
 * @Retorn:      ---
 ************************************************/
-void optionShowC(char ** sysports, int myPort);
+void optionShowC(char ** sysports, int myPort, char *ip);
 /***********************************************
 * @Finalitat:
 * @Parametres:
