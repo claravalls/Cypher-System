@@ -29,7 +29,6 @@ void optionSay(char ** comanda){
 void optionShowC(char ** sysports, int myPort, char *ip){
     int fd[2];          //variable que farà de pipe
 
-    printf("IP: %s\n",ip);
     //creem els arguments a passar-li al procés show_connections.sh
     char * argv[5] = {"./show_connections_v2.sh", sysports[0], sysports[1], ip, NULL};
 	
