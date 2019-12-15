@@ -30,7 +30,7 @@ void optionShowC(char ** sysports, int myPort){
     int fd[2];          //variable que farà de pipe
 
     //creem els arguments a passar-li al procés show_connections.sh
-    char * argv[4] = {"./show_connections.sh", sysports[0], sysports[1], NULL};
+    char * argv[5] = {"./show_connections_v2.sh", sysports[0], sysports[1], "127.0.0.1", NULL};
 	
     write(1, TESTING, strlen(TESTING));
 
