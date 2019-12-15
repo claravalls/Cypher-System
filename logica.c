@@ -79,5 +79,5 @@ void optionDownload(char *user, char *audio){
 void stopAll(){
 	write(1,"\n", strlen("\n"));
     optionExit();
-    int kill = raise(SIGINT);
+    raise(SIGINT);
 }
