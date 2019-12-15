@@ -161,24 +161,6 @@ char * comprovaNomUsuari(char *port, int myPort){
 }
 
 void enviaPaquet(int fd, char type, char* header, int length, char* data){
-    /*Protocol p;
-
-    //creem el paquet a enviar
-    p.type = type;
-    
-    p.header = (char*) malloc(strlen(header) + 1);
-    strcpy(p.header, header);
-    
-    p.length = length;
-
-    p.data = (char*) malloc(sizeof(char));
-
-    if(length !=  0){
-        //p.data = (char*) malloc(sizeof(char) * (length + 1));
-        p.data = (char*) realloc(p.data, length);
-        strncpy(p.data, data, length);
-    }
-*/
     //enviem el paquet camp a camp
     write(fd, &type, 1);
     write(fd, header, strlen(header));
