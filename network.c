@@ -206,7 +206,7 @@ void freeConnections(){
     for (int i = 0; i < qClients; i++){
         free(conn_clients[i].user);
     }
-    free(conn_clients);
+    free(conn_clients);			//invalid free??
 
     close(mySock);
 }
@@ -360,6 +360,7 @@ void enviaAudio(char* path, char *audioName, int sockfd){
     int q = 0;
     char *audio, c, *checksum;
 
+
     if(f < 0){
         enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
     }
@@ -387,5 +388,6 @@ void enviaAudio(char* path, char *audioName, int sockfd){
         checksum = calculaChecksum(path);
         enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
         free(checksum);
+        free(audio);
     }
 }

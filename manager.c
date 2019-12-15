@@ -443,9 +443,9 @@ char * buscaAudios(){
 
     //busquem arxius al directori  
     struct dirent **arxius;
-    char * path;
+    char *path;
     asprintf(&path, "./%s", config.dirAudios);
-    int q_arxius = scandir (path, &arxius, NULL, alphasort);
+    int q_arxius = scandir(path, &arxius, NULL, alphasort);
     free(path);
 
     if (arxius == NULL)
@@ -483,9 +483,7 @@ void buscaDownload(char * audio, int sockfd){
             free(aux);
             free(path);
         }
- 
         free(arxius[q_arxius]);
-        
     }
     if(noTrobat)
         enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
