@@ -467,6 +467,7 @@ void buscaDownload(char * audio, int sockfd){
     char * aux; 
     asprintf(&path, "./%s", config.dirAudios);
     int q_arxius = scandir (path, &arxius, NULL, alphasort);
+    int trobat = 0;
 
     if (arxius == NULL)
         write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
@@ -478,11 +479,13 @@ void buscaDownload(char * audio, int sockfd){
             enviaAudio(aux, arxius[q_arxius]->d_name, sockfd);
             free(aux);
             free(path);
-
+            trobat = 1;
         }
- 
         free(arxius[q_arxius]);
-        
+    }
+    if (!trobat)
+    {
+    	enviaAudio(aux, ERR_AUDIOS, sockfd);
     }
     free (arxius);  
 }

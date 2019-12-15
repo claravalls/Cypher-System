@@ -381,31 +381,40 @@ void enviaAudio(char* path, char *audioName, int sockfd){
     int q = 0;
     char *audio, c;
 
-    if(f < 0){
-        printf("No es pot obrir %s\n", path);
-    }
-    else{
-        size_t nbytes;
-        asprintf(&audio, "./%s", audioName);
-        //char *data = (char *)malloc(sizeof(char) * 512);
+    if (strcmp(audioName, ERR_AUDIOS) == 0)
+    {
+    	char *data = (char *)malloc(sizeof(char) * (strlen(ERR_AUDIOS)));
+    	strcpy(data, ERR_AUDIOS);
+    	enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", q, data);
+    	free(data);
+    }else{
+	    if(f < 0){
+	        printf("No es pot obrir %s\n", path);
+	    }
+	    else{
+	        size_t nbytes;
+	        asprintf(&audio, "./%s", audioName);
+	        //char *data = (char *)malloc(sizeof(char) * 512);
 
-        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
-        
-        do{
-            char *data = (char *)malloc(sizeof(char) * 512);
-            //llegeixo 512 bytes
-            for (q = 0; q < 512; q++)
-            {
-                nbytes = read(f, &c, 1);
-                if(nbytes <= 0) break;
-                //data = (char *)realloc(data, q + 1);
-                data[q] = c;
-            }
-            //envio
-            enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
-            free(data);
-        }while(nbytes > 0);
+	        enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
+	        
+	        do{
+	            char *data = (char *)malloc(sizeof(char) * 512);
+	            //llegeixo 512 bytes
+	            for (q = 0; q < 512; q++)
+	            {
+	                nbytes = read(f, &c, 1);
+	                if(nbytes <= 0) break;
+	                //data = (char *)realloc(data, q + 1);
+	                data[q] = c;
+	            }
+	            //envio
+	            enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", q, data);
 
-        enviaPaquet(sockfd, 0x05, "[EOF]", 0, NULL);
-    }
+	            free(data);
+	        }while(nbytes > 0);
+
+	        enviaPaquet(sockfd, 0x05, "[EOF]", 0, NULL);
+	    }
+	}
 }
