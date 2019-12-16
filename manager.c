@@ -329,9 +329,9 @@ void buscaPorts(int pipe, int myPort){
 
 char * buscaAudios(){
     char * llista;
-    
-    asprintf(&llista, SHOWAUDIOS, config.user, config.dirAudios);
 
+    asprintf(&llista, SHOWAUDIOS, config.user, config.dirAudios, "\n");
+   
     //busquem arxius al directori  
     struct dirent **arxius;
     char *path;
@@ -345,12 +345,16 @@ char * buscaAudios(){
     while (q_arxius--)
     {
         if ((strcmp (arxius[q_arxius]->d_name, ".") != 0) && (strcmp (arxius[q_arxius]->d_name, "..") != 0)){
-            asprintf(&llista, "%s%s\n", llista, arxius[q_arxius]->d_name);
+
+        	llista = (char*)realloc(llista, strlen(llista)+strlen(arxius[q_arxius]->d_name)+2);
+        	strcat(llista,arxius[q_arxius]->d_name);
+        	strcat(llista, "\n");
+            //asprintf(&llista, "%s%s\n", audios, arxius[q_arxius]->d_name);
             free (arxius[q_arxius]);
         }
     }
-    free (arxius); 
-    //strcat(llista, "\0");
+
+    free(arxius); 
 
     return llista; 
 }

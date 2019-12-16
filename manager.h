@@ -20,7 +20,7 @@
 #define ERR_FILE "Error opening file...\n"
 #define CONN_AVAIL "%d connections available\n"
 #define PROMPT "\n$%s: "
-#define SHOWAUDIOS "\n[%s] %s\n"
+#define SHOWAUDIOS "\n[%s] %s%s\n"
 #define ERR_AUDIOS "Error. Audio file inexistent\n"
 
 /***********************************************
