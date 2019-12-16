@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case BROADCAST:
-                optionBroadcast();
+                optionBroadcast(c[1]);
             break;  
 
             case SHOW_AUDIOS:

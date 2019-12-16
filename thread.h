@@ -22,6 +22,7 @@
 #define MD5OK "Audio correctly sent\n"
 #define MD5KO "Audio checksum doesn't match\n"
 #define AUDIOKO "This audio file does not exists\n"
+#define COOL "\n[%s] Cool!\n"
  
 typedef struct {
     int port;

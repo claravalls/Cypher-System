@@ -68,8 +68,8 @@ void optionShowA(char * username){
     enviaShowAudios(username);
 }
 
-void optionBroadcast(){
-
+void optionBroadcast(char * message){
+    sendBroadcast(message);
 }
 
 void optionDownload(char *user, char *audio){
