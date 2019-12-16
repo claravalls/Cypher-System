@@ -221,9 +221,6 @@ char llegeixComanda(char *comanda){
 }
 
 Config lecturaFitxer(const char *fitxer){
-	ssize_t nbytes;         //número de bytes llegits
-	unsigned char cadena;   //caràcter que llegim
-	int i = 0;              //variable que anirà recorrent la cadena
     int f;                  //file descriptor del fitxer    
     char * aux;             //cadena auxiliar per llegir valors enters
 

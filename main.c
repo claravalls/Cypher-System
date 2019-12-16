@@ -8,13 +8,14 @@
 #include "network.h"
 #include "thread.h"
 
-Config config;      //valors del fitxer de configuració
+Config config;      		//valors del fitxer de configuració
+extern char ** c; 			//valors introduits a la comanda
+
 
 int main(int argc, const char* argv[]){
     char opcio;         //valors de la opció introduida
     char* comanda;      //cadena de la comanda entrada
     int sockfd;         //sockfd del meu servidor
-    char ** valors;     //valors introduits a la comanda
 
     if (argc != 2){
         write(1, ERR_ARGS, strlen(ERR_ARGS));
@@ -54,7 +55,7 @@ int main(int argc, const char* argv[]){
         comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
         //obtenim els valors introduits a la comanda
-        valors = getValues();
+        //valors = getValues();
 
         switch(opcio){
             case SHOW_CONNECTIONS:
@@ -62,11 +63,11 @@ int main(int argc, const char* argv[]){
             break;
 
             case CONNECT:
-                optionConnect(valors[1], config.ip, config.user);
+                optionConnect(c[1], config.ip, config.user);
             break;
 
             case SAY:
-                optionSay(valors);
+                optionSay(c);
             break;
 
             case BROADCAST:
@@ -74,11 +75,11 @@ int main(int argc, const char* argv[]){
             break;  
 
             case SHOW_AUDIOS:
-                optionShowA(valors[1]);
+                optionShowA(c[1]);
             break;
 
             case DOWNLOAD:
-                optionDownload(valors[1], valors[2]);
+                optionDownload(c[1], c[2]);
             break;
 
             case EXIT:

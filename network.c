@@ -5,6 +5,9 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
+extern Config config;      		//valors del fitxer de configuració
+
+
 void setSockfd(int fd){ 
     mySock = fd;
 }
@@ -238,7 +241,7 @@ void enviaMissatge(char *user, char *missatge){
 void tancaConnexions(){
     int i = 0;
     //agafem el nom de l'usuari
-    Config config = getConfig();
+    //Config config = getConfig();
 
 
     //avisem a tots els clients connectats que es tancarà la connexió
@@ -387,6 +390,7 @@ void enviaAudio(char* path, char *audioName, int sockfd){
 
         checksum = calculaChecksum(path);
         enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
+        printf("%s\n",checksum);
         free(checksum);
         free(audio);
     }

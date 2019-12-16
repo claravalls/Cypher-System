@@ -105,6 +105,8 @@ static void *threadServ (void *servidor){
                     asprintf(&path, "./%s", audioName);
                     checksum = calculaChecksum(path);
 
+                    printf("%s\n",checksum);
+
                     if(strcmp(checksum, p.data) == 0){
                         enviaPaquet(c->sockfd, 0x05, "[MD5OK]", 0, NULL);
                         
