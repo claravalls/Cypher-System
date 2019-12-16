@@ -5,9 +5,6 @@ char ** c;              //comanda entrada
 char sizeofc;           //quantitat de paraules de la comanda
 Config config;          //valors del fitxer de configuració
 
-Config getConfig(){
-    return config;
-}
 
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
@@ -270,10 +267,6 @@ void alliberaMemoriaConfig(Config *config){
     free(config->sysports[1]);
     free(config->sysports);
     free(config->ipWeb);
-}
-
-char ** getValues(){
-    return c;
 }
 
 void buscaPorts(int pipe, int myPort){
