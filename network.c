@@ -12,6 +12,12 @@ void setSockfd(int fd){
     mySock = fd;
 }
 
+void unblock(){
+    shutdown(mySock, SHUT_RDWR);
+    //printf("Value of errno: %d\n", errno);
+    //perror("Error printed by perror");    
+}
+
 void afegeixClient(int newsock, char* user, char *clientName){  
     char *aux;  
     if(qClients == 0){

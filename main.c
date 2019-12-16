@@ -8,7 +8,7 @@
 #include "network.h"
 #include "thread.h"
 
-Config config;      		//valors del fitxer de configuració
+extern Config config;      		//valors del fitxer de configuració
 extern char ** c; 			//valors introduits a la comanda
 
 

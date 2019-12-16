@@ -1,5 +1,4 @@
 #include "thread.h"
-#include <errno.h>
 
 
 char apaga = 1;
@@ -53,11 +52,9 @@ static void *threadEscolta (void *config){
 
 void apagaServidor(){
     apaga = 0;
-    //close(mySockfd);
-    int a = shutdown(mySockfd, SHUT_RDWR);
-    printf("Value of errno: %d\n", errno);
-    perror("Error printed by perror");
-    pthread_join(escolta, NULL);
+    close(mySockfd);
+    //unblock();
+    //pthread_join(escolta, NULL);
 }
 
 static void *threadServ (void *servidor){
