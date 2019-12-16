@@ -20,15 +20,9 @@
 #define ERR_FILE "Error opening file...\n"
 #define CONN_AVAIL "%d connections available\n"
 #define PROMPT "\n$%s: "
-#define SHOWAUDIOS "\n[%s] %s\n"
+#define SHOWAUDIOS "\n[%s] %s%s\n"
 #define ERR_AUDIOS "Error. Audio file inexistent\n"
 
-/***********************************************
-* @Finalitat:   retornar el valor de la configuració llegida al fitxer
-* @Parametres:  ---
-* @Retorn:      retorna la informació llegida del fitxer
-************************************************/
-Config getConfig();
 /***********************************************
 * @Finalitat:   mostrar el prompt amb el nom de l'usuari pel terminal
 * @Parametres:  ---
@@ -71,12 +65,6 @@ void alliberaMemoriaC();
 * @Retorn:      ---
 ************************************************/
 void alliberaMemoriaConfig(Config * config);
-/***********************************************
-* @Finalitat:   retorna les paraules separades de la comanda introduïda per l'usuari
-* @Parametres:  ---
-* @Retorn:      array de cadenes que conté cadascuna de les paraules de la comanda
-************************************************/
-char ** getValues();
 /***********************************************
 * @Finalitat:   llegir un valor introduït fins a un caràcter en concret
 * @Parametres:  fd: file descriptor on s'ha de fer la lectura

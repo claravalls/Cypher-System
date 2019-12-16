@@ -114,8 +114,10 @@ int connectClient(int port, char *ip, char *myUsername){
     
     if (p.data != NULL){
         //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
-        conn_serv[qServ].user = (char *) malloc(strlen(p.data) + 1);
-        strcpy(conn_serv[qServ].user, p.data); 
+        //conn_serv[qServ].user = (char *) malloc(strlen(p.data) + 1);
+		//strcpy(conn_serv[qServ].user, p.data); 
+        asprintf(&(conn_serv[qServ].user), "%s", p.data);
+        
 
         iniciaThreadServidor(&conn_serv[qServ], myUsername);
         qServ++;
@@ -190,7 +192,7 @@ Protocol llegeixPaquet(int fd){
     
     read(fd, &p.length, 2);
 
-    p.data = (char *) malloc(p.length);
+    p.data = (char *) malloc(p.length+1);
 
     if(p.length != 0){
         read(fd, p.data, p.length);
@@ -204,12 +206,12 @@ void freeConnections(){
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
-    free(conn_serv);
+    //free(conn_serv);
     
     for (int i = 0; i < qClients; i++){
         free(conn_clients[i].user);
     }
-    free(conn_clients);			//invalid free??
+    //free(conn_clients);			
 
     close(mySock);
 }

@@ -43,8 +43,7 @@ static void *threadEscolta (void *config){
             close(newsock);
         }
         else {
-            clientName = (char*)malloc(strlen(p.data) + 1);
-            strcpy(clientName, p.data);
+            asprintf(&clientName, "%s", p.data);
             afegeixClient(newsock, c->user, clientName);
             alliberaPaquet(p);
         }
