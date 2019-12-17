@@ -147,6 +147,4 @@ void enviaAudio(char *path, char *audioName, int sockfd);
 
 void sendBroadcast(char * message);
 
-void unblock();
-
 #endif

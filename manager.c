@@ -5,6 +5,7 @@ char ** c;              //comanda entrada
 char sizeofc;           //quantitat de paraules de la comanda
 Config config;          //valors del fitxer de configuració
 
+pthread_mutex_t sWrite = PTHREAD_MUTEX_INITIALIZER;
 
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
@@ -419,3 +420,11 @@ char * calculaChecksum (char *path){
     }
     return checksum;
 }
+
+/*
+void escriuTerminal (char * missatge){ //funcio que es crida cada write(1, ..., ...)
+    pthread_mutex_lock(&sWrite);
+    write(1, missatge, strlen(missatge));
+    pthread_mutex_unlock(&sWrite);
+}
+*/

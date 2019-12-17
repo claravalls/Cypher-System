@@ -27,7 +27,6 @@ static void *threadEscolta (void *config){
         socklen_t len = sizeof (s_addr);
         mySockfd = c->sockfd;
         newsock = accept (mySockfd, (void *) &s_addr, &len);
-            printf("MUERO\n");
 
         if (newsock < 0) {
             write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
@@ -53,6 +52,7 @@ static void *threadEscolta (void *config){
 void apagaServidor(){
     apaga = 0;
     close(mySockfd);
+    //shutdown(mySock, SHUT_RDWR);
     //unblock();
     //pthread_join(escolta, NULL);
 }
@@ -115,8 +115,6 @@ static void *threadServ (void *servidor){
                     //calculem el checksum de ./ + audioName
                     asprintf(&path, "./%s", audioName);
                     checksum = calculaChecksum(path);
-
-                    printf("%s\n",checksum);
 
                     if(strcmp(checksum, p.data) == 0){
                         enviaPaquet(c->sockfd, 0x05, "[MD5OK]", 0, NULL);

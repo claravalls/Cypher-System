@@ -12,12 +12,6 @@ void setSockfd(int fd){
     mySock = fd;
 }
 
-void unblock(){
-    shutdown(mySock, SHUT_RDWR);
-    //printf("Value of errno: %d\n", errno);
-    //perror("Error printed by perror");    
-}
-
 void afegeixClient(int newsock, char* user, char *clientName){  
     char *aux;  
     if(qClients == 0){
@@ -405,7 +399,6 @@ void enviaAudio(char* path, char *audioName, int sockfd){
 
         checksum = calculaChecksum(path);
         enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
-        printf("%s\n",checksum);
         free(checksum);
         free(audio);
     }
