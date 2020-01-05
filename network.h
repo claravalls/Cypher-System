@@ -28,6 +28,8 @@
 #define CONN_WITH_NAME "\n%d %s\n"
 #define NOU_CLIENT "New connection. User: %s\n"
 #define ADEU_CLIENT "Client %s has disconnected\n"
+#define AUTO_CONNECT "Cannot connect to your own port\n"
+#define ALREADY_CONN "This connection already exists\n"
 
 
 typedef struct{

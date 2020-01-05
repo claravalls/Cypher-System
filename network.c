@@ -70,6 +70,21 @@ int connectClient(int port, char *ip, char *myUsername){
     char* okMessage;
     Protocol p;
 
+    //ens assegurem que no es connecti a ell mateix
+    if (port == config.port){
+        write(1, AUTO_CONNECT, strlen(AUTO_CONNECT));
+        return -1;
+    }
+
+    //mirem que no estigui ja connectat
+    for (int i = 0; i < qServ; i++)
+    {
+        if(conn_serv[i].port == port){
+            write (1, ALREADY_CONN, strlen(ALREADY_CONN));
+            return -1;
+        }
+    }
+    
     int sockc = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockc < 0) {
         return -1;

@@ -426,5 +426,5 @@ void escriuTerminal (char * missatge){ //funcio que es crida cada write(1, ..., 
     pthread_mutex_lock(&sWrite);
     write(1, missatge, strlen(missatge));
     pthread_mutex_unlock(&sWrite);
-}
+} //fer destroy del semafor
 */
