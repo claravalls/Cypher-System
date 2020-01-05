@@ -145,4 +145,6 @@ void enviaDownloadAudio(char *user, char *audio);
 
 void enviaAudio(char *path, char *audioName, int sockfd);
 
+void sendBroadcast(char * message);
+
 #endif

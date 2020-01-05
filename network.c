@@ -240,6 +240,13 @@ void enviaMissatge(char *user, char *missatge){
     }
 }
 
+void sendBroadcast(char * message){
+    for (int i = 0; i < qServ; i++)
+    {
+        enviaPaquet(conn_serv[i].sockfd, 0x03, "[BROADCAST]", strlen(message), message);
+    }
+}
+
 void tancaConnexions(){
     int i = 0;
     //agafem el nom de l'usuari
@@ -392,7 +399,6 @@ void enviaAudio(char* path, char *audioName, int sockfd){
 
         checksum = calculaChecksum(path);
         enviaPaquet(sockfd, 0x05, "[EOF]", strlen(checksum), checksum);
-        printf("%s\n",checksum);
         free(checksum);
         free(audio);
     }

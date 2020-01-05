@@ -8,7 +8,7 @@
 #include "network.h"
 #include "thread.h"
 
-Config config;      		//valors del fitxer de configuració
+extern Config config;      		//valors del fitxer de configuració
 extern char ** c; 			//valors introduits a la comanda
 
 
@@ -71,7 +71,7 @@ int main(int argc, const char* argv[]){
             break;
 
             case BROADCAST:
-                optionBroadcast();
+                optionBroadcast(c[1]);
             break;  
 
             case SHOW_AUDIOS:

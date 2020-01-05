@@ -1,5 +1,6 @@
 #include "thread.h"
 
+
 char apaga = 1;
 pthread_mutex_t mtxC = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
@@ -12,11 +13,11 @@ UserThread *tServ;
 UserThread *tCli;
 int qTServ;
 int qTCli;
-
+pthread_t escolta;
+int mySockfd;                       //Sockfd del meu servidor
 
 static void *threadEscolta (void *config){
     int newsock;                    //socket que vol connectar-se
-    int socket;                     //socket del meu servidor
     char *clientName;               //nom del client que es connecta
     Config *c = (Config *) config;  //valors del fitxer de configuració
     Protocol p;                     //protocol de comunicació
@@ -24,8 +25,9 @@ static void *threadEscolta (void *config){
     while (apaga){
         struct sockaddr_in s_addr;
         socklen_t len = sizeof (s_addr);
-        socket = c->sockfd;
-        newsock = accept (socket, (void *) &s_addr, &len);
+        mySockfd = c->sockfd;
+        newsock = accept (mySockfd, (void *) &s_addr, &len);
+
         if (newsock < 0) {
             write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
             return (void *) -1;
@@ -44,17 +46,21 @@ static void *threadEscolta (void *config){
             alliberaPaquet(p);
         }
     }
-    return (void *) c;
+    return NULL;
 }
 
 void apagaServidor(){
     apaga = 0;
+    close(mySockfd);
+    //shutdown(mySock, SHUT_RDWR);
+    //unblock();
+    //pthread_join(escolta, NULL);
 }
 
 static void *threadServ (void *servidor){
-    Conn_serv *aux = (Conn_serv *) servidor;   //informació del client que s'ha connectat
+    Conn_serv *aux = (Conn_serv *) servidor; //informació del client que s'ha connectat
     Conn_serv *c;
-    Protocol p;                               //protocol de comunicació
+    Protocol p;                              //protocol de comunicació
     char connectatS = 1;                     //variable que indica quan aturar el thread
     int audioFile;
     char primer = 1, *cadena, *audioName, *checksum, *path;
@@ -73,6 +79,12 @@ static void *threadServ (void *servidor){
                 break;
 
             case 0x03:
+                if(strcmp(p.header, "[MSGOK]") == 0){
+                    asprintf(&cadena, COOL, c->user);
+                    write(1, cadena, strlen(cadena));
+                    free(cadena);
+                    imprimeixPrompt();
+                }
                 break;
 
             case 0x04:                
@@ -103,8 +115,6 @@ static void *threadServ (void *servidor){
                     //calculem el checksum de ./ + audioName
                     asprintf(&path, "./%s", audioName);
                     checksum = calculaChecksum(path);
-
-                    printf("%s\n",checksum);
 
                     if(strcmp(checksum, p.data) == 0){
                         enviaPaquet(c->sockfd, 0x05, "[MD5OK]", 0, NULL);
@@ -151,9 +161,6 @@ static void *threadServ (void *servidor){
                     free(c);
                 }
                 break;
-
-                default:
-                printf("%s\n", p.header);
         }
         alliberaPaquet(p);
     }
@@ -190,6 +197,11 @@ static void *threadCli (void *client){
                 break;
 
             case 0x03:
+                if(strcmp(p.header, "[BROADCAST]") == 0){
+                    imprimeixMissatge(p.data, c->user);
+                    imprimeixPrompt();
+                    enviaPaquet(c->sockfd, 0x03, "[MSGOK]", 0, NULL);
+                }
                 break;
 
             case 0x04:
@@ -278,8 +290,7 @@ void iniciaThreadClient(Conn_cli* client, char *user){
 }
 
 void iniciaThreadEscolta(Config* config){
-    pthread_t t1;
-    pthread_create(&t1, NULL, threadEscolta, config);
+    pthread_create(&escolta, NULL, threadEscolta, config);
     
     qTServ = 0;
     qTCli = 0;

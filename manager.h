@@ -13,6 +13,7 @@
 #include <string.h>
 #include <signal.h>
 #include <dirent.h>
+#include <pthread.h>
 
 #include "logica.h"
 #include "network.h"
@@ -87,5 +88,7 @@ char * buscaAudios();
 void buscaDownload(char * audio, int sockfd);
 
 char * calculaChecksum (char *path);
+
+//void escriuTerminal (char * missatge);
 
 #endif
