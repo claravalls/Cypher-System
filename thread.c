@@ -76,6 +76,10 @@ static void *threadServ (void *servidor){
             
         switch(p.type){
             case 0x02:
+                if(strcmp(p.header, "[MSG]") == 0){
+                    imprimeixMissatge(p.data, c->user);
+                    imprimeixPrompt();
+                }
                 break;
 
             case 0x03:
@@ -124,8 +128,7 @@ static void *threadServ (void *servidor){
                         free(cadena);
                     }
                     else{
-                         enviaPaquet(c->sockfd, 0x05, "[MD5KO]", 0, NULL);
-                         escriuTerminal(MD5OK);
+                        enviaPaquet(c->sockfd, 0x05, "[MD5KO]", 0, NULL);
                     }
                     
                     free(path);
@@ -206,6 +209,8 @@ static void *threadCli (void *client){
 
             case 0x04:
                 if(strcmp(p.header, "[SHOW_AUDIOS]") == 0){
+                    enviaPaquet(c->sockfd, 0x02, "[MSG]", strlen(SHOW_REBUT), SHOW_REBUT);
+                    free(missatge);
                     audiosShow = buscaAudios();
                     enviaPaquet(c->sockfd, 0x04, "[LIST_AUDIOS]", strlen(audiosShow), audiosShow);
                     free(audiosShow);
@@ -216,14 +221,9 @@ static void *threadCli (void *client){
                 if(strcmp(p.header, "[AUDIO_RQST]") == 0){
                     //solicitud audio
                     buscaDownload(p.data, c->sockfd);
-
-                }else if(strcmp(p.header, "[MD5OK]") == 0){
-                    escriuTerminal(MD5OK);
-                    imprimeixPrompt();
                    
                 }else if(strcmp(p.header, "[MD5KO]") == 0){
-                    escriuTerminal(MD5KO);
-                    imprimeixPrompt();
+                    enviaPaquet(c->sockfd, 0x02, "[MSG]", strlen(MD5KO), MD5KO);
                 }
                 break;
 

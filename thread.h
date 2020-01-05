@@ -17,12 +17,12 @@
 #include "network.h"
 #include "logica.h"
 
-#define TRANS_END "\n[%s] %s downloaded"
+#define TRANS_END "\n[%s] %s correctly downloaded"
 #define DOWNLOADING "\nDownloading...\n"
-#define MD5OK "Audio correctly sent\n"
 #define MD5KO "Audio checksum doesn't match\n"
 #define AUDIOKO "This audio file does not exists\n"
 #define COOL "\n[%s] Cool!\n"
+#define SHOW_REBUT "Audios list solicited\n"
  
 typedef struct {
     int port;
