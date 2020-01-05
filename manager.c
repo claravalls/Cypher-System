@@ -330,7 +330,7 @@ void buscaPorts(int pipe, int myPort){
 char * buscaAudios(){
     char * llista;
 
-    asprintf(&llista, SHOWAUDIOS, config.user, config.dirAudios, "\n");
+    asprintf(&llista, SHOWAUDIOS, config.user, config.dirAudios);
    
     //busquem arxius al directori  
     struct dirent **arxius;
