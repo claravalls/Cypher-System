@@ -48,6 +48,7 @@ typedef struct{
 * @Retorn:      ---
 ************************************************/
 void iniciaThreadEscolta(Config* config);
+
 /***********************************************
 * @Finalitat:   crear un thread que estarà escoltant constantment
                 al servidor a qui s'ha connectat per si envia algun missatge
@@ -55,6 +56,7 @@ void iniciaThreadEscolta(Config* config);
 * @Retorn:      ---
 ************************************************/
 void iniciaThreadServidor(Conn_serv *servidor, char *user);
+
 /***********************************************
 * @Finalitat:   crear un thread que estarà escoltant constantment
                 al client per si envia algun missatge
@@ -62,6 +64,7 @@ void iniciaThreadServidor(Conn_serv *servidor, char *user);
 * @Retorn:      ---
 ************************************************/
 void iniciaThreadClient(Conn_cli *client, char *user);
+
 /***********************************************
 * @Finalitat:   aturar el thread del servidor que espera noves connexions
 * @Parametres:  ---
@@ -69,9 +72,21 @@ void iniciaThreadClient(Conn_cli *client, char *user);
 ************************************************/
 void apagaServidor();
 
-
+/***********************************************
+* @Finalitat:   Fa el join de tots els threads que fossin creats per un usuari
+* @Parametres:  user: nom de l'usuari propietari dels threads
+* @Retorn:      ---
+************************************************/
 void joinUserThread(char *user);
 
+/***********************************************
+* @Finalitat:   Elimina de l'array de threads aquells que ja no estiguin actius
+                i shifta els valors perque quedin tots seguits a l'array
+* @Parametres:  tThread: array de threads a shiftar
+                user: nom de l'usuari que jo no té threads actius
+                length: mida de l'array de threads
+* @Retorn:      ---
+************************************************/
 void shiftJoins(UserThread *tThread, char *user, int lenght);
 
 #endif
