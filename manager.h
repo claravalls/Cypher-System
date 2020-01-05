@@ -89,6 +89,8 @@ void buscaDownload(char * audio, int sockfd);
 
 char * calculaChecksum (char *path);
 
-//void escriuTerminal (char * missatge);
+void escriuTerminal (char * missatge);
+
+void noMoreWrite();
 
 #endif

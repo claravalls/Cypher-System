@@ -32,7 +32,7 @@ void afegeixClient(int newsock, char* user, char *clientName){
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 
     asprintf(&aux, NOU_CLIENT, clientName);
-    write(1, aux, strlen(aux));
+    escriuTerminal(aux);
     free(aux);
 
     imprimeixPrompt();
@@ -72,7 +72,7 @@ int connectClient(int port, char *ip, char *myUsername){
 
     //ens assegurem que no es connecti a ell mateix
     if (port == config.port){
-        write(1, AUTO_CONNECT, strlen(AUTO_CONNECT));
+        escriuTerminal(AUTO_CONNECT);
         return -1;
     }
 
@@ -80,7 +80,7 @@ int connectClient(int port, char *ip, char *myUsername){
     for (int i = 0; i < qServ; i++)
     {
         if(conn_serv[i].port == port){
-            write (1, ALREADY_CONN, strlen(ALREADY_CONN));
+            escriuTerminal(ALREADY_CONN);
             return -1;
         }
     }
@@ -97,14 +97,14 @@ int connectClient(int port, char *ip, char *myUsername){
     s_addr.sin_port = htons (port);
 
     if (inet_aton (ip, &s_addr.sin_addr) == 0) {
-        write (1, ERR_IP, strlen(ERR_IP));
+        escriuTerminal(ERR_IP);
         return -1;
     }
 
     if (connect (sockc, (void *) &s_addr, sizeof (s_addr)) < 0){
         okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(ip) + 4);
         sprintf(okMessage, ERR_CON_PORT, ip, port);
-        write(1, okMessage, strlen(okMessage));
+        escriuTerminal(okMessage);
         free(okMessage);
         return -1;
     }
@@ -140,7 +140,7 @@ int connectClient(int port, char *ip, char *myUsername){
         //mostrem el missatge de connexió OK
         okMessage = (char *) malloc(strlen(ERR_CON_PORT) + strlen(p.data) + 5); 
         sprintf (okMessage, OK_CONN, port, p.data);
-        write (1, okMessage, strlen(okMessage));
+        escriuTerminal(okMessage);
         free(okMessage);
 
         alliberaPaquet(p); 
@@ -216,8 +216,8 @@ Protocol llegeixPaquet(int fd){
     return p;
 }
 
-void freeConnections(){                    
-    write(1, CLOSING, strlen(CLOSING));
+void freeConnections(){ 
+    escriuTerminal(CLOSING);                   
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
@@ -235,7 +235,7 @@ void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
     aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user))); //SUMAR MIDA DE USER I MISSATGE
     sprintf(aux, MESSAGE, user, missatge);
-    write(1, aux, strlen(aux));
+    escriuTerminal(aux);
     free(aux);
 }
 
@@ -250,9 +250,8 @@ void enviaMissatge(char *user, char *missatge){
         }
     }
     //comprovem si el nom d'usuari introduit és incorrecte
-    if(sockfd == 0){
-        write(1, ERR_USER, strlen(ERR_USER));
-    }
+    if(sockfd == 0)
+        escriuTerminal(ERR_USER);
 }
 
 void sendBroadcast(char * message){
@@ -361,9 +360,8 @@ void enviaShowAudios(char *user){
         }
     }
     //comprovem si el nom d'usuari introduit és incorrecte
-    if(sockfd == 0){
-        write(1, ERR_USER, strlen(ERR_USER));
-    }
+    if(sockfd == 0)
+        escriuTerminal(ERR_USER);
 }
 
 void enviaDownloadAudio(char *user, char *audio){
@@ -377,9 +375,8 @@ void enviaDownloadAudio(char *user, char *audio){
         }
     }
     //comprovem si el nom d'usuari introduit és incorrecte
-    if(sockfd == 0){
-        write(1, ERR_USER, strlen(ERR_USER));
-    }
+    if(sockfd == 0)
+        escriuTerminal(ERR_USER);
 }
 
 void enviaAudio(char* path, char *audioName, int sockfd){

@@ -2,7 +2,7 @@
 #include "network.h"
 
 void optionExit(){
-    write(1,DISCONNECT, strlen(DISCONNECT));
+    escriuTerminal(DISCONNECT);
 
     //avisem als clients
     tancaConnexions();
@@ -13,12 +13,15 @@ void optionExit(){
     //deixem d'escoltar connexions
     apagaServidor();
 
+    //destruim el semàfor de l'escriptura a pantalla
+    noMoreWrite();
+
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);
 }
 
 void optionConnect(char* port, char *ip, char *username){
-    write(1, CONNECTING, strlen(CONNECTING));
+    escriuTerminal(CONNECTING);
     connectClient(atoi(port), ip, username);
 }
 
@@ -32,10 +35,10 @@ void optionShowC(char ** sysports, int myPort, char *ip){
     //creem els arguments a passar-li al procés show_connections.sh
     char * argv[5] = {"./show_connections_v2.sh", sysports[0], sysports[1], ip, NULL};
 	
-    write(1, TESTING, strlen(TESTING));
+    escriuTerminal(TESTING);
 
     if (pipe(fd) == -1){
-        write(1, ERR_PIPE, strlen (ERR_PIPE));
+        escriuTerminal(ERR_PIPE);
         exit(-1);
     }
     
@@ -47,11 +50,11 @@ void optionShowC(char ** sysports, int myPort, char *ip){
 
             //executem show_connections.sh
             if(execvp(argv[0], argv) < 0){
-                write(1, ERR_CONN, strlen(ERR_CONN));
+                escriuTerminal(ERR_CONN);
             }
             break;
         case -1:
-            write(1, ERR_CONN, strlen(ERR_CONN));
+            escriuTerminal(ERR_CONN);
             break;
         default:
             close(fd[1]);
@@ -77,7 +80,7 @@ void optionDownload(char *user, char *audio){
 }
 
 void stopAll(){
-	write(1,"\n", strlen("\n"));
+    escriuTerminal("\n");
     optionExit();
     raise(SIGINT);
 }
