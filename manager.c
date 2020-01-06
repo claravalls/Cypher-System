@@ -11,7 +11,7 @@ void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
     aux = (char*) malloc(strlen(PROMPT) + strlen(config.user));
     sprintf(aux, PROMPT, config.user);
-    write(1, aux, strlen(aux));
+    escriuTerminal(aux);
     free(aux);
 }
 char* readUntil(int fd, char end, char lastChar) {
@@ -57,7 +57,7 @@ void separaComanda(char *comanda, char limit, int i, int casella){
 
     //mirem que la comanda no estigui buida
     if(comanda[i] == '\n'){
-        write(1, ERR_ARGS, strlen(ERR_ARGS));
+        escriuTerminal(ERR_ARGS);
         c[casella][0] = '\0';
     }
     else{
@@ -226,7 +226,7 @@ Config lecturaFitxer(const char *fitxer){
     f = open(fitxer, O_RDONLY);
     if (f < 0)
     {
-    	write(1, ERR_FILE, strlen(ERR_FILE));
+    	escriuTerminal(ERR_FILE);
 		config.user = NULL;
 	}
 
@@ -317,12 +317,12 @@ void buscaPorts(int pipe, int myPort){
     //mostrem el missatge de la quantitat de connexions disponibles
     aux = (char *) malloc(sizeof(char) * strlen(CONN_AVAIL));
     sprintf(aux, CONN_AVAIL, nConn);
-    write(1, aux, strlen(aux));
+    escriuTerminal(aux);
     free(aux);
 
     //mostrem les connexions disponibles
     for (int i = 0; i < nConn; i++){
-        write(1, connexions[i], strlen(connexions[i]));
+        escriuTerminal(connexions[i]);
         free(connexions[i]);
     }
     free(connexions);
@@ -341,7 +341,7 @@ char * buscaAudios(){
     free(path);
 
     if (arxius == NULL)
-        write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
+        escriuTerminal(ERR_AUDIOS);
     
     while (q_arxius--)
     {
@@ -368,7 +368,7 @@ void buscaDownload(char * audio, int sockfd){
     int q_arxius = scandir (path, &arxius, NULL, alphasort);
 
     if (arxius == NULL)
-        write(1, ERR_AUDIOS, strlen(ERR_AUDIOS));
+        escriuTerminal(ERR_AUDIOS);
     
     while (q_arxius--)
     {
@@ -393,8 +393,8 @@ char * calculaChecksum (char *path){
     char * argv[3] = {"md5sum", path, NULL};
 
     if (pipe(fd) == -1){
-            write(1, ERR_PIPE, strlen (ERR_PIPE));
-            exit(-1);
+        escriuTerminal(ERR_PIPE);
+        exit(-1);
     }
     
     pid_t pid = fork ();
@@ -407,7 +407,7 @@ char * calculaChecksum (char *path){
             execvp(argv[0], argv);
             break;
         case -1:
-            write(1, ERR_CONN, strlen(ERR_CONN));
+            escriuTerminal(ERR_CONN);
             break;
         default: //pare
             close(fd[1]);
@@ -421,10 +421,13 @@ char * calculaChecksum (char *path){
     return checksum;
 }
 
-/*
-void escriuTerminal (char * missatge){ //funcio que es crida cada write(1, ..., ...)
+
+void escriuTerminal (char * missatge){ 
     pthread_mutex_lock(&sWrite);
     write(1, missatge, strlen(missatge));
     pthread_mutex_unlock(&sWrite);
+} 
+
+void noMoreWrite(){
+    pthread_mutex_destroy(&sWrite);
 }
-*/

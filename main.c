@@ -18,7 +18,7 @@ int main(int argc, const char* argv[]){
     int sockfd;         //sockfd del meu servidor
 
     if (argc != 2){
-        write(1, ERR_ARGS, strlen(ERR_ARGS));
+        escriuTerminal(ERR_ARGS);
         return -1;
     }
 
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]){
     //iniciem la connexió del servidor
     sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
-        write(1, ERR_SOCKET, strlen(ERR_SOCKET));
+        escriuTerminal(ERR_SOCKET);
         return -1;
     }
 
@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]){
     //iniciem el thread del servidor per acceptar connexions
     iniciaThreadEscolta(&config); 
 
-    write(1, STARTING, strlen(STARTING));
+    escriuTerminal(STARTING);
 
     do{  
         imprimeixPrompt(config);
@@ -87,7 +87,7 @@ int main(int argc, const char* argv[]){
             break;
 
             default:
-                write(1, ERR_OPTION, strlen(ERR_OPTION));
+                escriuTerminal(ERR_OPTION);
         }
 
         free(comanda);

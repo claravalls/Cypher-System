@@ -30,12 +30,14 @@
 * @Retorn:      ---
 ************************************************/
 void imprimeixPrompt();
+
 /***********************************************
 * @Finalitat:   llegir el fitxer de configuració i extreure'n la informació
 * @Parametres:  fitxer: cadena que conté el nom del fitxer a llegir
 * @Retorn:      variable que conté tota la informació del fitxer
 ************************************************/
 Config lecturaFitxer(const char *fitxer);
+
 /***********************************************
 * @Finalitat:   separar les paraules de la comanda introduïda per l'usuari
 * @Parametres:  comanda: cadena que conté la comanda sencera
@@ -45,6 +47,7 @@ Config lecturaFitxer(const char *fitxer);
 * @Retorn:      ---
 ************************************************/
 void separaComanda(char *comanda, char limit, int i, int casella);
+
 /***********************************************
 * @Finalitat:   interpretar la comanda introduïda per l'usuari
 * @Parametres:  comanad: cadena que conté la comanda sencera
@@ -52,6 +55,7 @@ void separaComanda(char *comanda, char limit, int i, int casella);
                 d'executar
 ************************************************/
 char llegeixComanda(char * comanda);
+
 /***********************************************
 * @Finalitat:   alliberar la memòria de l'estructura utilitzada per emmagatzemar
                 el valor de la comanda introduïda per l'usuari
@@ -59,6 +63,7 @@ char llegeixComanda(char * comanda);
 * @Retorn:      ---
 ************************************************/
 void alliberaMemoriaC();
+
 /***********************************************
 * @Finalitat:   alliberar la memòria de l'estructura que guarda la informació del
                 fitxer de configuració
@@ -66,6 +71,7 @@ void alliberaMemoriaC();
 * @Retorn:      ---
 ************************************************/
 void alliberaMemoriaConfig(Config * config);
+
 /***********************************************
 * @Finalitat:   llegir un valor introduït fins a un caràcter en concret
 * @Parametres:  fd: file descriptor on s'ha de fer la lectura
@@ -74,6 +80,7 @@ void alliberaMemoriaConfig(Config * config);
 * @Retorn:
 ************************************************/
 char* readUntil(int fd, char end, char lastChar);
+
 /***********************************************
 * @Finalitat:   parsejar l'output de l'execució del fitxer show_connections.sh per 
                 obtenir les ports disponibles
@@ -83,12 +90,42 @@ char* readUntil(int fd, char end, char lastChar);
 ************************************************/
 void buscaPorts(int pipe, int myPort);
 
+/***********************************************
+* @Finalitat:   Trobar els fitxers que es troben en un path conegut i afegir-los en 
+                una cadena separats per \n
+* @Parametres:  ---
+* @Retorn:      cadena amb la llista de tots els audios
+************************************************/
 char * buscaAudios();
 
+/***********************************************
+* @Finalitat:   Buscar el fitxer a descarregar 
+* @Parametres:  audio: nom del fitxer a descarregar
+                sockfd: socket a qui enviar el fitxer
+* @Retorn:      ---
+************************************************/
 void buscaDownload(char * audio, int sockfd);
 
+/***********************************************
+* @Finalitat:   Calcular el checksum d'un fitxer
+* @Parametres:  path: ubicació del fitxer
+* @Retorn:      cadena amb el valor del checksum
+************************************************/
 char * calculaChecksum (char *path);
 
-//void escriuTerminal (char * missatge);
+/***********************************************
+* @Finalitat:   Escriu, amb exclusió mútua, per pantalla el missatge rebut
+* @Parametres:  missatge: cadena a imprimir per pantalla
+* @Retorn:      ---
+************************************************/
+void escriuTerminal (char * missatge);
+
+/***********************************************
+* @Finalitat:   Destruir el semàfor que fa exclusió mútua de l'escriptura
+                per pantalla
+* @Parametres:  ---
+* @Retorn:      ---
+************************************************/
+void noMoreWrite();
 
 #endif

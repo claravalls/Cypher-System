@@ -29,7 +29,7 @@ static void *threadEscolta (void *config){
         newsock = accept (mySockfd, (void *) &s_addr, &len);
 
         if (newsock < 0) {
-            write(1, ERR_ACCEPT, strlen(ERR_ACCEPT));
+            escriuTerminal(ERR_ACCEPT);
             return (void *) -1;
         }
 
@@ -76,12 +76,16 @@ static void *threadServ (void *servidor){
             
         switch(p.type){
             case 0x02:
+                if(strcmp(p.header, "[MSG]") == 0){
+                    imprimeixMissatge(p.data, c->user);
+                    imprimeixPrompt();
+                }
                 break;
 
             case 0x03:
                 if(strcmp(p.header, "[MSGOK]") == 0){
                     asprintf(&cadena, COOL, c->user);
-                    write(1, cadena, strlen(cadena));
+                    escriuTerminal(cadena);
                     free(cadena);
                     imprimeixPrompt();
                 }
@@ -89,7 +93,7 @@ static void *threadServ (void *servidor){
 
             case 0x04:                
                 if(strcmp(p.header, "[LIST_AUDIOS]") == 0){
-                    write(1, p.data, strlen(p.data));
+                    escriuTerminal(p.data);
                     imprimeixPrompt();
                 }
                 break;
@@ -105,7 +109,7 @@ static void *threadServ (void *servidor){
 
                         strcpy(&audioName[0], &audioName[1]); //traiem el . de la cadena
                         strcpy(&audioName[0], &audioName[1]); //traiem el / de la cadena
-                        write(1, DOWNLOADING, strlen(DOWNLOADING));
+                        escriuTerminal(DOWNLOADING);
                     }
                     else{
                         write(audioFile, p.data, p.length);
@@ -120,12 +124,11 @@ static void *threadServ (void *servidor){
                         enviaPaquet(c->sockfd, 0x05, "[MD5OK]", 0, NULL);
                         
                         asprintf(&cadena, TRANS_END, c->user, audioName);
-                        write(1, cadena, strlen(cadena));
+                        escriuTerminal(cadena);
                         free(cadena);
                     }
                     else{
-                         enviaPaquet(c->sockfd, 0x05, "[MD5KO]", 0, NULL);
-                         write(1, MD5KO, strlen(MD5KO));
+                        enviaPaquet(c->sockfd, 0x05, "[MD5KO]", 0, NULL);
                     }
                     
                     free(path);
@@ -139,7 +142,7 @@ static void *threadServ (void *servidor){
                 
                 else if(strcmp(p.header, "[AUDIO_KO]") == 0){
                     //no existeix l'audio 
-                    write(1, AUDIOKO ,strlen(AUDIOKO));
+                    escriuTerminal(AUDIOKO);
                     imprimeixPrompt();
                 }
                 break;
@@ -206,6 +209,8 @@ static void *threadCli (void *client){
 
             case 0x04:
                 if(strcmp(p.header, "[SHOW_AUDIOS]") == 0){
+                    enviaPaquet(c->sockfd, 0x02, "[MSG]", strlen(SHOW_REBUT), SHOW_REBUT);
+                    free(missatge);
                     audiosShow = buscaAudios();
                     enviaPaquet(c->sockfd, 0x04, "[LIST_AUDIOS]", strlen(audiosShow), audiosShow);
                     free(audiosShow);
@@ -216,14 +221,9 @@ static void *threadCli (void *client){
                 if(strcmp(p.header, "[AUDIO_RQST]") == 0){
                     //solicitud audio
                     buscaDownload(p.data, c->sockfd);
-
-                }else if(strcmp(p.header, "[MD5OK]") == 0){
-                    write(1, MD5OK, strlen(MD5OK));
-                    imprimeixPrompt();
                    
                 }else if(strcmp(p.header, "[MD5KO]") == 0){
-                    write(1, MD5KO, strlen(MD5KO));
-                    imprimeixPrompt();
+                    enviaPaquet(c->sockfd, 0x02, "[MSG]", strlen(MD5KO), MD5KO);
                 }
                 break;
 
@@ -240,7 +240,7 @@ static void *threadCli (void *client){
                 else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatC = 0;
                     asprintf(&missatge, ADEU_CLIENT, c->user);
-                    write(1, missatge, strlen(missatge));
+                    escriuTerminal(missatge);
                     free(missatge);
 
                     imprimeixPrompt();
