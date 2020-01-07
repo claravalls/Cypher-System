@@ -5,7 +5,7 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
-extern Config config;      		//valors del fitxer de configuració
+extern Config config;      	//valors del fitxer de configuració
 
 
 void setSockfd(int fd){ 
@@ -229,7 +229,7 @@ void freeConnections(){
     }
     free(conn_clients);			
 
-    close(mySock);
+    //close(mySock);
 
     alliberaMemoriaConfig(&config);
 }

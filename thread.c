@@ -1,5 +1,5 @@
 #include "thread.h"
-
+#include "errno.h"
 
 char apaga = 1;
 pthread_mutex_t mtxC = PTHREAD_MUTEX_INITIALIZER;
@@ -24,36 +24,43 @@ static void *threadEscolta (void *config){
     Config *c = (Config *) config;  //valors del fitxer de configuració
     Protocol p;                     //protocol de comunicació
     
+    struct sockaddr_in c_addr;
+    socklen_t c_len = sizeof (c_addr);
+    mySockfd = c->sockfd;
+    //fcntl(mySockfd, F_SETFL, fcntl(mySockfd, F_GETFL, 0) | O_NONBLOCK);
+        
     while (apaga){
-        struct sockaddr_in s_addr;
-        socklen_t len = sizeof (s_addr);
-        mySockfd = c->sockfd;
-        newsock = accept (mySockfd, (void *) &s_addr, &len);
-
+        newsock = accept (mySockfd, (void *) &c_addr, &c_len);
+        printf("adeu accept\n");
         if (newsock < 0) {
-            escriuTerminal(ERR_ACCEPT);
-            return (void *) -1;
+            //escriuTerminal(ERR_ACCEPT);
+            apaga = 0;
         }
-
-        //esperem el missatge del client que s'ha connectat
-        p = llegeixPaquet(newsock);
-      
-        if (p.data == NULL){
-            //És una connexió falsa. La tanquem
-            close(newsock);
+        else{
+            //esperem el missatge del client que s'ha connectat
+            p = llegeixPaquet(newsock);
+        
+            if (p.data == NULL){
+                //És una connexió falsa. La tanquem
+                close(newsock);
+            }
+            else {
+                asprintf(&clientName, "%s", p.data);
+                afegeixClient(newsock, c->user, clientName);
+                alliberaPaquet(p);
+            }
         }
-        else {
-            asprintf(&clientName, "%s", p.data);
-            afegeixClient(newsock, c->user, clientName);
-            alliberaPaquet(p);
-        }
+        
     }
     return NULL;
 }
 
 void apagaServidor(){
     apaga = 0;
-    close(mySockfd);
+    //close(mySockfd);
+    shutdown(mySockfd, SHUT_RDWR);
+
+    pthread_join(escolta, NULL);
 
     pthread_mutex_destroy(&mtxC);
     pthread_mutex_destroy(&mtxS);
@@ -63,10 +70,6 @@ void apagaServidor(){
 
     pthread_mutex_destroy(&mtxArrayS);
     pthread_mutex_destroy(&mtxArrayC);
-
-    //shutdown(mySock, SHUT_RDWR);
-    //unblock();
-    //pthread_join(escolta, NULL);
 }
 
 static void *threadServ (void *servidor){
@@ -328,7 +331,7 @@ void iniciaThreadEscolta(Config* config){
 
 void joinUserThread(char *user){
     pthread_mutex_lock(&mtxqS);
-    for (int i = 0; i < qTServ; ++i)
+    for (int i = 0; i < qTServ; i++)
     {
         pthread_mutex_unlock(&mtxqS);
         if (strcmp(user, tServ[i].user) == 0)
@@ -340,13 +343,14 @@ void joinUserThread(char *user){
             pthread_mutex_lock(&mtxqS);
             shiftJoins(tServ, user, qTServ);   
             qTServ--;
+            i--;
             pthread_mutex_unlock(&mtxqS);
             pthread_mutex_unlock(&mtxArrayS);
         }
     }
 
     pthread_mutex_lock(&mtxqC);
-    for (int i = 0; i < qTCli; ++i)
+    for (int i = 0; i < qTCli; i++)
     {
         pthread_mutex_unlock(&mtxqC);
         if (strcmp(user, tCli[i].user) == 0)
@@ -358,36 +362,34 @@ void joinUserThread(char *user){
             pthread_mutex_lock(&mtxqC);
             shiftJoins(tCli, user, qTCli);
             qTCli--;
+            i--;
             pthread_mutex_unlock(&mtxqC);
             pthread_mutex_unlock(&mtxArrayC);
         }
     }
 }
 
-
-
 void shiftJoins(UserThread *tThread, char *user, int lenght){
     int s = 0, b;
-
-    if(lenght == 1){ //es l'ultim client
-        free(tThread);
-    }
-    else{
-        //busquem al client a l'array
-        for (b = 0; b < lenght; b++){
-            if(strcmp(user, tThread[b].user) == 0){
-                s = b + 1;
-
-                if(s < lenght){
-                    //shiftem els valors a l'esquerra
-                    for (int i = b; s < lenght; i++){
-                        tThread[b] = tThread[s];
-                        b++;
-                        s++;
-                    }
-                    break;
+    //busquem al client a l'array
+    for (b = 0; b < lenght; b++){
+        if(strcmp(user, tThread[b].user) == 0){
+            s = b + 1;
+            
+            if(s < lenght){ //si hem d'eliminar l'últim valor no cal shiftar
+                //shiftem els valors a l'esquerra
+                for (int i = b; i < lenght; i++){
+                    tThread[b] = tThread[s];
+                    b++;
+                    s++;
                 }
             }
+
+            if(lenght == 1){ //es l'ultim client
+                free(tThread);
+            }
+        
+            break;
         }
     }
 }
