@@ -8,6 +8,8 @@ pthread_mutex_t mtxS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxArrayS = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mtxArrayC = PTHREAD_MUTEX_INITIALIZER;
 
+pthread_mutex_t mtxqS = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtxqC = PTHREAD_MUTEX_INITIALIZER;
 
 UserThread *tServ;
 UserThread *tCli;
@@ -55,6 +57,9 @@ void apagaServidor(){
 
     pthread_mutex_destroy(&mtxC);
     pthread_mutex_destroy(&mtxS);
+
+    pthread_mutex_destroy(&mtxqC);
+    pthread_mutex_destroy(&mtxqS);
 
     pthread_mutex_destroy(&mtxArrayS);
     pthread_mutex_destroy(&mtxArrayC);
@@ -246,6 +251,7 @@ static void *threadCli (void *client){
                     asprintf(&missatge, ADEU_CLIENT, c->user);
                     escriuTerminal(missatge);
                     free(missatge);
+                    imprimeixPrompt();
 
                     //S'ha de modificar l'array de conn_serv i restar una qServ;
                     pthread_mutex_lock(&mtxC);
@@ -275,6 +281,7 @@ static void *threadCli (void *client){
 }
 
 void iniciaThreadServidor(Conn_serv* servidor, char *user){
+    pthread_mutex_lock(&mtxqS);
     if(qTServ == 0){
         tServ = (UserThread*)malloc(sizeof(UserThread));
     }
@@ -287,9 +294,11 @@ void iniciaThreadServidor(Conn_serv* servidor, char *user){
 
     pthread_create(&(tServ[qTServ].t), NULL, threadServ, servidor);
     qTServ++;
+    pthread_mutex_unlock(&mtxqS);
 }
 
 void iniciaThreadClient(Conn_cli* client, char *user){
+    pthread_mutex_lock(&mtxqC);
     if(qTCli == 0){
         tCli = (UserThread*)malloc(sizeof(UserThread));
     }
@@ -302,44 +311,54 @@ void iniciaThreadClient(Conn_cli* client, char *user){
 
     pthread_create(&(tCli[qTCli].t), NULL, threadCli, client);
     qTCli++;
+    pthread_mutex_unlock(&mtxqC);
 }
 
 void iniciaThreadEscolta(Config* config){
     pthread_create(&escolta, NULL, threadEscolta, config);
     
+    pthread_mutex_lock(&mtxqS);
     qTServ = 0;
+    pthread_mutex_unlock(&mtxqS);
+    pthread_mutex_lock(&mtxqC);
     qTCli = 0;
+    pthread_mutex_unlock(&mtxqC);
 }
 
 
 void joinUserThread(char *user){
-
+    pthread_mutex_lock(&mtxqS);
     for (int i = 0; i < qTServ; ++i)
     {
+        pthread_mutex_unlock(&mtxqS);
         if (strcmp(user, tServ[i].user) == 0)
         {
             //enviaPaquet(tServ[i].listener, 0x06, "[CONOK]", strlen(user), user);
 
             pthread_join(tServ[i].t, NULL);
             pthread_mutex_lock(&mtxArrayS);
+            pthread_mutex_lock(&mtxqS);
             shiftJoins(tServ, user, qTServ);   
             qTServ--;
+            pthread_mutex_unlock(&mtxqS);
             pthread_mutex_unlock(&mtxArrayS);
         }
     }
 
+    pthread_mutex_lock(&mtxqC);
     for (int i = 0; i < qTCli; ++i)
     {
+        pthread_mutex_unlock(&mtxqC);
         if (strcmp(user, tCli[i].user) == 0)
         {
             //enviaPaquet(tCli[i].listener, 0x06, "[CONOK]", strlen(user), user);
 
             pthread_join(tCli[i].t, NULL);
             pthread_mutex_lock(&mtxArrayC);
-
+            pthread_mutex_lock(&mtxqC);
             shiftJoins(tCli, user, qTCli);
-
             qTCli--;
+            pthread_mutex_unlock(&mtxqC);
             pthread_mutex_unlock(&mtxArrayC);
         }
     }
@@ -350,27 +369,24 @@ void joinUserThread(char *user){
 void shiftJoins(UserThread *tThread, char *user, int lenght){
     int s = 0, b;
 
-    //busquem al client a l'array
-    for (b = 0; b < lenght; b++){
-        if(strcmp(user, tThread[b].user) == 0){
-            s = b + 1;
+    if(lenght == 1){ //es l'ultim client
+        free(tThread);
+    }
+    else{
+        //busquem al client a l'array
+        for (b = 0; b < lenght; b++){
+            if(strcmp(user, tThread[b].user) == 0){
+                s = b + 1;
 
-            if(s < lenght){
-                free(tThread[b].user);
-                //shiftem els valors a l'esquerra
-                for (int i = b; i < lenght; i++){
-                    tThread[b] = tThread[s];
-                    b++;
-                    s++;
+                if(s < lenght){
+                    //shiftem els valors a l'esquerra
+                    for (int i = b; s < lenght; i++){
+                        tThread[b] = tThread[s];
+                        b++;
+                        s++;
+                    }
+                    break;
                 }
-            }
-            if(lenght == 1){ //es l'ultim client
-                free(tThread[0].user);
-                free(tThread);
-            }
-            else{
-                //redimensionem la mida de l'array
-                //tThread = (UserThread *) realloc(tThread, sizeof(UserThread) * (lenght - 1));
             }
         }
     }

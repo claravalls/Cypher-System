@@ -228,6 +228,8 @@ void freeConnections(){
     free(conn_clients);			
 
     close(mySock);
+
+    alliberaMemoriaConfig(&config);
 }
 
 void imprimeixMissatge(char *missatge, char* user){

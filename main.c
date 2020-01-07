@@ -36,6 +36,7 @@ int main(int argc, const char* argv[]){
     sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
         escriuTerminal(ERR_SOCKET);
+        alliberaMemoriaConfig(&config);
         return -1;
     }
 
@@ -94,8 +95,6 @@ int main(int argc, const char* argv[]){
         alliberaMemoriaC();
 
     }while(opcio != EXIT);
-
-    alliberaMemoriaConfig(&config);
 
     return 0;
 }
