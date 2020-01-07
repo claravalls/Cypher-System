@@ -267,7 +267,7 @@ static void *threadCli (void *client){
                 }
                 else if(strcmp(p.header, "[CONOK]") == 0){
                     connectatC = 0;
-
+                    
                     close(c->sockfd);
                     free(c->user);
                     free(c);

@@ -186,7 +186,7 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     write(fd, header, strlen(header));
     write(fd, &length, 2);
 
-    if(length != 0){
+    if(length > 0){
         write(fd, data, length);
     }
 }
@@ -206,10 +206,12 @@ Protocol llegeixPaquet(int fd){
     p.header = readUntil(fd, ']', ']');
     
     read(fd, &p.length, 2);
+    
+    p.data = (char *) malloc(p.length + 1);
 
     if(p.length != 0){
-        p.data = (char *) malloc(p.length+1);
         read(fd, p.data, p.length);
+        p.data[p.length] = '\0';
     }
 
     return p;
@@ -234,8 +236,7 @@ void freeConnections(){
 
 void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
-    aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user))); //SUMAR MIDA DE USER I MISSATGE
-    sprintf(aux, MESSAGE, user, missatge);
+    asprintf(&aux, MESSAGE, user, missatge);
     escriuTerminal(aux);
     free(aux);
 }
@@ -351,8 +352,7 @@ void eliminaConnexioServ(char *user){
 
 void alliberaPaquet(Protocol p){
     free(p.header);
-    if(p.length > 0)
-        free(p.data);
+    free(p.data);
 }
 
 void enviaShowAudios(char *user){
