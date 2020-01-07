@@ -207,9 +207,8 @@ Protocol llegeixPaquet(int fd){
     
     read(fd, &p.length, 2);
 
-    p.data = (char *) malloc(p.length+1);
-
     if(p.length != 0){
+        p.data = (char *) malloc(p.length+1);
         read(fd, p.data, p.length);
     }
 
@@ -221,12 +220,12 @@ void freeConnections(){
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
-    //free(conn_serv);
+    free(conn_serv);
     
     for (int i = 0; i < qClients; i++){
         free(conn_clients[i].user);
     }
-    //free(conn_clients);			
+    free(conn_clients);			
 
     close(mySock);
 }
@@ -290,6 +289,7 @@ void eliminaConnexioCli(char *user){
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
             s = b + 1;
+            //free(conn_clients[b].user);
             
             if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
@@ -301,6 +301,7 @@ void eliminaConnexioCli(char *user){
             }
 
             if(qClients == 1){ //es l'ultim client
+                free(conn_clients[0].user);
                 free(conn_clients);
             }
             else{
@@ -320,6 +321,7 @@ void eliminaConnexioServ(char *user){
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
             s = b + 1;
+            //free(conn_serv[b].user);
             
             if(s < qServ){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
@@ -331,6 +333,7 @@ void eliminaConnexioServ(char *user){
             }
 
             if(qServ == 1){ //es l'ultim servidor
+                free(conn_serv[0].user);
                 free(conn_serv);
             }
             else{
@@ -346,7 +349,8 @@ void eliminaConnexioServ(char *user){
 
 void alliberaPaquet(Protocol p){
     free(p.header);
-    free(p.data);
+    if(p.length > 0)
+        free(p.data);
 }
 
 void enviaShowAudios(char *user){
