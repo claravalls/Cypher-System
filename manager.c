@@ -9,6 +9,7 @@ pthread_mutex_t sWrite = PTHREAD_MUTEX_INITIALIZER;
 
 void imprimeixPrompt(){
     char *aux;          //variable que contindrà el prompt
+
     aux = (char*) malloc(strlen(PROMPT) + strlen(config.user));
     sprintf(aux, PROMPT, config.user);
     escriuTerminal(aux);
@@ -41,12 +42,6 @@ char* readUntil(int fd, char end, char lastChar) {
     return string;
 }
 
-/**
- * comanda: cadena sencera llegida
- * limit: caracter fins on hem de separar
- * i: casella inicial de la cadena comanda on començar a separar
- * casella: casella de l'array on guardar el valor separat
-*/
 void separaComanda(char *comanda, char limit, int i, int casella){
     int j = 0;
 
@@ -247,8 +242,6 @@ Config lecturaFitxer(const char *fitxer){
     return config;
 }
 
-
-
 void alliberaMemoriaC(){
     //alliberem memòria de c
     for (int i = 0; i <= sizeofc; i++)
@@ -257,7 +250,6 @@ void alliberaMemoriaC(){
     }
     free(c);
 }
-
 
 void alliberaMemoriaConfig(Config *config){
     //alliberem memoria
@@ -350,7 +342,6 @@ char * buscaAudios(){
         	llista = (char*)realloc(llista, strlen(llista)+strlen(arxius[q_arxius]->d_name)+2);
         	strcat(llista,arxius[q_arxius]->d_name);
         	strcat(llista, "\n");
-            //asprintf(&llista, "%s%s\n", audios, arxius[q_arxius]->d_name);
             free (arxius[q_arxius]);
         }
     }
@@ -420,7 +411,6 @@ char * calculaChecksum (char *path){
     }
     return checksum;
 }
-
 
 void escriuTerminal (char * missatge){ 
     pthread_mutex_lock(&sWrite);

@@ -55,8 +55,6 @@ int main(int argc, const char* argv[]){
         //Llegim opcio introduida
         comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
-        //obtenim els valors introduits a la comanda
-        //valors = getValues();
 
         switch(opcio){
             case SHOW_CONNECTIONS:
