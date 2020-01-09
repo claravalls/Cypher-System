@@ -162,6 +162,11 @@ static void *threadServ (void *servidor){
                     //enviar el paquet de desconnexió OK
                     enviaPaquet(c->sockfd, 0x06, "[CONOK]", 0, "");
 
+                    asprintf(&cadena, ADEU_SERV, c->user);
+                    escriuTerminal(cadena);
+                    free(cadena);
+                    imprimeixPrompt();
+
                     //S'ha de modificar l'array de conn_serv i restar una qServ;
                     pthread_mutex_lock(&mtxS);
                     eliminaConnexioServ(c->user);
