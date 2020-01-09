@@ -36,6 +36,7 @@ int main(int argc, const char* argv[]){
     sockfd = connectServer(config.ip, config.port);
     if (sockfd < 0) {
         escriuTerminal(ERR_SOCKET);
+        alliberaMemoriaConfig(&config);
         return -1;
     }
 
@@ -54,8 +55,6 @@ int main(int argc, const char* argv[]){
         //Llegim opcio introduida
         comanda = readUntil(0, '\n', '\n');
         opcio = llegeixComanda(comanda);
-        //obtenim els valors introduits a la comanda
-        //valors = getValues();
 
         switch(opcio){
             case SHOW_CONNECTIONS:
@@ -94,8 +93,6 @@ int main(int argc, const char* argv[]){
         alliberaMemoriaC();
 
     }while(opcio != EXIT);
-
-    alliberaMemoriaConfig(&config);
 
     return 0;
 }

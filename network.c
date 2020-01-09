@@ -5,8 +5,7 @@ Conn_serv *conn_serv;       //a qui m'he connectat
 int qClients, qServ;        //comptador dels clients i servidors connectats
 int mySock;                 //valor del meu socket
 
-extern Config config;      		//valors del fitxer de configuració
-
+extern Config config;      	//valors del fitxer de configuració
 
 void setSockfd(int fd){ 
     mySock = fd;
@@ -27,7 +26,6 @@ void afegeixClient(int newsock, char* user, char *clientName){
     conn_clients[qClients].user = clientName;
     qClients++;
 
-
     //notifiquem al client que la connexió ha funcionat
     enviaPaquet(newsock, 0x01, "[CONOK]", strlen(user), user);
 
@@ -39,7 +37,6 @@ void afegeixClient(int newsock, char* user, char *clientName){
 
     //creem el thread del client
     iniciaThreadClient(&conn_clients[qClients - 1], user);
-
 }
 
 int connectServer(const char* ip, int port){
@@ -128,12 +125,10 @@ int connectClient(int port, char *ip, char *myUsername){
     p = llegeixPaquet(sockc);
     
     if (p.data != NULL){
-        //guardem el nom d'usuari i augmentem el número de servidors als que m'he connectat
-        //conn_serv[qServ].user = (char *) malloc(strlen(p.data) + 1);
-		//strcpy(conn_serv[qServ].user, p.data); 
+        //guardem el nom d'usuari
         asprintf(&(conn_serv[qServ].user), "%s", p.data);
         
-
+        //iniciem un thread que escoltara al servidor
         iniciaThreadServidor(&conn_serv[qServ], myUsername);
         qServ++;
 
@@ -160,7 +155,7 @@ char * comprovaNomUsuari(char *port, int myPort){
     }
     else{
         //posem el missatge a mostrar com al número del port
-        missatge = (char *) malloc(strlen(port) + 2); //Pel \n que afegirem i el \0 que afegeix el strcpy
+        missatge = (char *) malloc(strlen(port) + 2); //+2 pel \n que afegirem i el \0 que afegeix el strcpy
         strcpy(missatge, port);     
         strcat(missatge, "\n");
 
@@ -186,7 +181,7 @@ void enviaPaquet(int fd, char type, char* header, int length, char* data){
     write(fd, header, strlen(header));
     write(fd, &length, 2);
 
-    if(length != 0){
+    if(length > 0){
         write(fd, data, length);
     }
 }
@@ -206,11 +201,12 @@ Protocol llegeixPaquet(int fd){
     p.header = readUntil(fd, ']', ']');
     
     read(fd, &p.length, 2);
-
-    p.data = (char *) malloc(p.length+1);
+    
+    p.data = (char *) malloc(p.length + 1);
 
     if(p.length != 0){
         read(fd, p.data, p.length);
+        p.data[p.length] = '\0';
     }
 
     return p;
@@ -221,20 +217,20 @@ void freeConnections(){
     for (int i = 0; i < qServ; i++){
         free(conn_serv[i].user);
     }
-    //free(conn_serv);
+    free(conn_serv);
     
     for (int i = 0; i < qClients; i++){
         free(conn_clients[i].user);
     }
-    //free(conn_clients);			
+    free(conn_clients);			
 
-    close(mySock);
+    alliberaMemoriaConfig(&config);
 }
 
 void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
-    aux = (char*) malloc(sizeof(char) * (strlen(MESSAGE) + strlen(missatge) + strlen(user))); //SUMAR MIDA DE USER I MISSATGE
-    sprintf(aux, MESSAGE, user, missatge);
+
+    asprintf(&aux, MESSAGE, user, missatge);
     escriuTerminal(aux);
     free(aux);
 }
@@ -263,23 +259,18 @@ void sendBroadcast(char * message){
 
 void tancaConnexions(){
     int i = 0;
-    //agafem el nom de l'usuari
-    //Config config = getConfig();
-
 
     //avisem a tots els clients connectats que es tancarà la connexió
     while(i < qClients) {
         enviaPaquet(conn_clients[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
         i++;
     }
+
     i = 0;
     //avisem a tots els servidors que es tancarà la connexió
     while(i < qServ) {
         enviaPaquet(conn_serv[i].sockfd, 0x06, "[]", strlen(config.user), config.user);
-
-        //close(conn_serv[i].sockfd);
         i++;
-        
     }
     joinUserThread(config.user);
 }
@@ -301,6 +292,7 @@ void eliminaConnexioCli(char *user){
             }
 
             if(qClients == 1){ //es l'ultim client
+                free(conn_clients[0].user);
                 free(conn_clients);
             }
             else{
@@ -331,6 +323,7 @@ void eliminaConnexioServ(char *user){
             }
 
             if(qServ == 1){ //es l'ultim servidor
+                free(conn_serv[0].user);
                 free(conn_serv);
             }
             else{
@@ -384,14 +377,13 @@ void enviaAudio(char* path, char *audioName, int sockfd){
     int q = 0;
     char *audio, c, *checksum;
 
-
     if(f < 0){
         enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
     }
 
     else{
         size_t nbytes;
-        //envio nom de l'audio a crear
+        //envio nom de l'audio a crear per sabem com s'ha de dir el fitxer on guardar la info
         asprintf(&audio, "./%s", audioName);
         enviaPaquet(sockfd, 0x05, "[AUDIO_RSPNS]", strlen(audio), audio);
         
