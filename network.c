@@ -230,6 +230,11 @@ void freeConnections(){
 void imprimeixMissatge(char *missatge, char* user){
     char *aux;          //cadena del missatge
 
+    //eliminem les ""
+    if(missatge[0] == '"' && missatge[strlen(missatge) - 1] == '"'){
+        strcpy(&missatge[0], &missatge[1]); //traiem el " de la cadena
+        missatge[strlen(missatge) - 1] = '\0';
+    }
     asprintf(&aux, MESSAGE, user, missatge);
     escriuTerminal(aux);
     free(aux);
@@ -281,8 +286,10 @@ void eliminaConnexioCli(char *user){
     for (b = 0; b < qClients; b++){
         if(strcmp(user, conn_clients[b].user) == 0){
             s = b + 1;
+            free(conn_clients[b].user);
             
             if(s < qClients){ //si hem d'eliminar l'últim valor no cal shiftar
+                
                 //shiftem els valors a l'esquerra
                 for (int i = b; i < qClients; i++){
                     conn_clients[b] = conn_clients[s];
@@ -292,7 +299,7 @@ void eliminaConnexioCli(char *user){
             }
 
             if(qClients == 1){ //es l'ultim client
-                free(conn_clients[0].user);
+                //free(conn_clients[0].user);
                 free(conn_clients);
             }
             else{
@@ -300,7 +307,6 @@ void eliminaConnexioCli(char *user){
                 conn_clients = (Conn_cli *) realloc(conn_clients, sizeof(Conn_cli) * (qClients - 1));
             }
             qClients--;
-        
             break;
         }
     }
@@ -312,6 +318,7 @@ void eliminaConnexioServ(char *user){
     for (b = 0; b < qServ; b++){
         if(strcmp(user, conn_serv[b].user) == 0){
             s = b + 1;
+            free(conn_serv[b].user);
             
             if(s < qServ){ //si hem d'eliminar l'últim valor no cal shiftar
                 //shiftem els valors a l'esquerra
@@ -323,7 +330,7 @@ void eliminaConnexioServ(char *user){
             }
 
             if(qServ == 1){ //es l'ultim servidor
-                free(conn_serv[0].user);
+                //free(conn_serv[0].user);
                 free(conn_serv);
             }
             else{
@@ -331,7 +338,7 @@ void eliminaConnexioServ(char *user){
                 conn_serv = (Conn_serv *) realloc(conn_serv, sizeof(Conn_serv) * (qServ - 1));
             }
             qServ--;
-
+            
             break;
         }
     }

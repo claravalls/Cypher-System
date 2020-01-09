@@ -2,7 +2,7 @@
 
 
 char ** c;              //comanda entrada
-char sizeofc;           //quantitat de paraules de la comanda
+char sizeofc = -1;           //quantitat de paraules de la comanda
 Config config;          //valors del fitxer de configuració
 
 pthread_mutex_t sWrite = PTHREAD_MUTEX_INITIALIZER;
@@ -39,6 +39,7 @@ char* readUntil(int fd, char end, char lastChar) {
         string = (char*)realloc(string, sizeof(char) * (i + 2));
         string[i - 1] = '\0';
     }
+
     return string;
 }
 
@@ -248,7 +249,8 @@ void alliberaMemoriaC(){
     {
         free(c[i]);
     }
-    free(c);
+    if (sizeofc >= 0)
+        free(c);
 }
 
 void alliberaMemoriaConfig(Config *config){
@@ -341,9 +343,9 @@ char * buscaAudios(){
 
         	llista = (char*)realloc(llista, strlen(llista)+strlen(arxius[q_arxius]->d_name)+2);
         	strcat(llista,arxius[q_arxius]->d_name);
-        	strcat(llista, "\n");
-            free (arxius[q_arxius]);
+        	strcat(llista, "\n"); 
         }
+        free (arxius[q_arxius]);
     }
 
     free(arxius); 
@@ -368,7 +370,6 @@ void buscaDownload(char * audio, int sockfd){
             asprintf(&aux, "%s/%s", path, arxius[q_arxius]->d_name);
             enviaAudio(aux, arxius[q_arxius]->d_name, sockfd);
             free(aux);
-            free(path);
         }
         free(arxius[q_arxius]);
     }
@@ -376,6 +377,7 @@ void buscaDownload(char * audio, int sockfd){
         enviaPaquet(sockfd, 0x05, "[AUDIO_KO]", 0, NULL);
 
     free (arxius);  
+    free(path);
 }
 
 char * calculaChecksum (char *path){

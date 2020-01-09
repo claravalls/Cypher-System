@@ -1,6 +1,8 @@
 #include "logica.h"
 #include "network.h"
 
+extern char *comanda;
+
 void optionExit(){
     escriuTerminal(DISCONNECT);
 
@@ -15,6 +17,9 @@ void optionExit(){
 
     //destruim el semàfor de l'escriptura a pantalla
     noMoreWrite();
+
+    free(comanda);
+    alliberaMemoriaC();
 
     //reconfigurem signals
     signal(SIGINT, SIG_DFL);

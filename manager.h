@@ -20,9 +20,9 @@
 
 #define ERR_FILE "Error opening file...\n"
 #define CONN_AVAIL "%d connections available\n"
-#define PROMPT "\n$%s: "
-#define SHOWAUDIOS "\n[%s] %s%s\n"
-#define ERR_AUDIOS "Error. Audio file inexistent\n"
+#define PROMPT "\r$%s: "
+#define SHOWAUDIOS "\r[%s] %s\n"
+#define ERR_AUDIOS "\rError. Audio file inexistent\n"
 
 /***********************************************
 * @Finalitat:   mostrar el prompt amb el nom de l'usuari pel terminal

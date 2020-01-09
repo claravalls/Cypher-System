@@ -17,11 +17,11 @@
 #include "network.h"
 #include "logica.h"
 
-#define TRANS_END "\n[%s] %s correctly downloaded"
-#define DOWNLOADING "\nDownloading...\n"
-#define MD5KO "Audio checksum doesn't match\n"
-#define AUDIOKO "This audio file does not exists\n"
-#define COOL "\n[%s] Cool!\n"
+#define TRANS_END "\r[%s] %s correctly downloaded\n"
+#define DOWNLOADING "\rDownloading...\n"
+#define MD5KO "\rAudio checksum doesn't match\n"
+#define AUDIOKO "\rThis audio file does not exists\n"
+#define COOL "\r[%s] Cool!\n"
 #define SHOW_REBUT "Audios list solicited\n"
  
 typedef struct {

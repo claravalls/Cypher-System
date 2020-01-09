@@ -1,5 +1,5 @@
 //Practica SISTEMES OPERATIUS
-//Fase actual: 2
+//Fase actual: 4
 //Clara Valls - clara.valls
 //Ariel Andreas Daniele - arielandreas.daniele
 
@@ -9,12 +9,12 @@
 #include "thread.h"
 
 extern Config config;      		//valors del fitxer de configuració
-extern char ** c; 			//valors introduits a la comanda
+extern char ** c; 			    //valors introduits a la comanda
+char* comanda;                  //cadena de la comanda entrada
 
 
 int main(int argc, const char* argv[]){
     char opcio;         //valors de la opció introduida
-    char* comanda;      //cadena de la comanda entrada
     int sockfd;         //sockfd del meu servidor
 
     if (argc != 2){
