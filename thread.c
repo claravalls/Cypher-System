@@ -90,6 +90,7 @@ static void *threadServ (void *servidor){
                     imprimeixMissatge(p.data, c->user);
                     imprimeixPrompt();
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x03:
@@ -99,6 +100,7 @@ static void *threadServ (void *servidor){
                     free(cadena);
                     imprimeixPrompt();
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x04:                
@@ -106,6 +108,7 @@ static void *threadServ (void *servidor){
                     escriuTerminal(p.data);
                     imprimeixPrompt();
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x05:
@@ -155,6 +158,7 @@ static void *threadServ (void *servidor){
                     escriuTerminal(AUDIOKO);
                     imprimeixPrompt();
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x06:
@@ -184,9 +188,9 @@ static void *threadServ (void *servidor){
                     free(c->user);
                     free(c);
                 }
+                alliberaPaquet(p);
                 break;
         }
-        alliberaPaquet(p);
     }
 
     return NULL;
@@ -215,6 +219,7 @@ static void *threadCli (void *client){
                     imprimeixMissatge(p.data, c->user);
                     imprimeixPrompt();
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x03:
@@ -223,6 +228,7 @@ static void *threadCli (void *client){
                     imprimeixPrompt();
                     enviaPaquet(c->sockfd, 0x03, "[MSGOK]", 0, NULL);
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x04:
@@ -233,6 +239,7 @@ static void *threadCli (void *client){
                     enviaPaquet(c->sockfd, 0x04, "[LIST_AUDIOS]", strlen(audiosShow), audiosShow);
                     free(audiosShow);
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x05:
@@ -243,6 +250,7 @@ static void *threadCli (void *client){
                 }else if(strcmp(p.header, "[MD5KO]") == 0){
                     enviaPaquet(c->sockfd, 0x02, "[MSG]", strlen(MD5KO), MD5KO);
                 }
+                alliberaPaquet(p);
                 break;
 
             case 0x06:
@@ -274,10 +282,10 @@ static void *threadCli (void *client){
                     free(c->user);
                     free(c);
                 }
+                alliberaPaquet(p);
                 break;
         }
 
-        alliberaPaquet(p);
     }
     return NULL;
 }

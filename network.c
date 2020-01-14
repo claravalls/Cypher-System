@@ -344,7 +344,7 @@ void eliminaConnexioServ(char *user){
     }
 }
 
-void alliberaPaquet(Protocol p){
+void alliberaPaquet(Protocol p){  
     free(p.header);
     free(p.data);
 }
