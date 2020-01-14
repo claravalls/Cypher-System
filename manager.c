@@ -2,7 +2,7 @@
 
 
 char ** c;              //comanda entrada
-char sizeofc = -1;           //quantitat de paraules de la comanda
+char sizeofc = -1;      //quantitat de paraules de la comanda
 Config config;          //valors del fitxer de configuració
 
 pthread_mutex_t sWrite = PTHREAD_MUTEX_INITIALIZER;
@@ -16,8 +16,8 @@ void imprimeixPrompt(){
     free(aux);
 }
 char* readUntil(int fd, char end, char lastChar) {
-    int i = 0;       //variable que recorre la cadena
-    char c = '\0';     //caràcter que llegim
+    int i = 0;          //variable que recorre la cadena
+    char c = '\0';      //caràcter que llegim
 
     char* string = (char*)malloc(sizeof(char));
 

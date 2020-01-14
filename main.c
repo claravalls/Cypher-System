@@ -12,10 +12,9 @@ extern Config config;      		//valors del fitxer de configuració
 extern char ** c; 			    //valors introduits a la comanda
 char* comanda;                  //cadena de la comanda entrada
 
-
 int main(int argc, const char* argv[]){
-    char opcio;         //valors de la opció introduida
-    int sockfd;         //sockfd del meu servidor
+    char opcio;                 //valors de la opció introduida
+    int sockfd;                 //sockfd del meu servidor
 
     if (argc != 2){
         escriuTerminal(ERR_ARGS);
